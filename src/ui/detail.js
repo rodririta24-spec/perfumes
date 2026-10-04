@@ -75,7 +75,11 @@ export function renderDetail(view, api, id, { fromData = false } = {}) {
     delete form.dataset.dirty;
     saveBtn.disabled = true;
     api.backend.updatePerfume(p.id, input)
-      .catch((x) => toast(errorMessage(x), 'error'));
+      .catch((x) => {
+        form.dataset.dirty = '1';
+        saveBtn.disabled = false;
+        toast(errorMessage(x), 'error');
+      });
     toast('Cambios guardados', 'success');
   };
 
