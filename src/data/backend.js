@@ -5,7 +5,7 @@ import {
   collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, writeBatch,
 } from '../fs.js';
 import { firebaseConfig, OWNER_EMAIL } from '../config.js';
-import { preparePerfume, importId } from '../lib/perfume.js';
+import { preparePerfume, importId, validPatch } from '../lib/perfume.js';
 import { ValidationError } from '../lib/errors.js';
 import { chunk } from '../lib/chunk.js';
 
@@ -47,12 +47,13 @@ export async function updatePerfume(id, input) {
 }
 
 export async function patchPerfume(id, patch) {
-  const ok = Object.keys(patch).every((k) => (k === 'favorite' && typeof patch[k] === 'boolean') || (k === 'status' && (patch[k] === 'owned' || patch[k] === 'wishlist')));
-  if (!ok || !Object.keys(patch).length) throw new ValidationError(['Cambio no permitido']);
+  const errors = validPatch(patch);
+  if (errors.length) throw new ValidationError(errors);
   return updateDoc(doc(col, id), { ...patch, updatedAt: serverTimestamp() });
 }
 export const removePerfume = (id) => deleteDoc(doc(col, id));
 
+// Los llamadores deben pasar planImport(...).toAdd (nunca pisa perfumes existentes).
 export async function importPerfumes(items, onProgress = () => {}) {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('Sin conexión: conectate a internet para importar.');
   let done = 0;

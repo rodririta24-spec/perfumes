@@ -16,9 +16,16 @@ function locate(timeout) {
 
 export async function fetchWeather({ lat, lon }) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&current=temperature_2m,weather_code`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) throw new Error(`Open-Meteo respondió ${res.status}`);
-  const json = await res.json();
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  let json;
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) throw new Error(`Open-Meteo respondió ${res.status}`);
+    json = await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
   const temp = json?.current?.temperature_2m;
   const code = json?.current?.weather_code;
   if (typeof temp !== 'number' || typeof code !== 'number') throw new Error('Respuesta de clima inválida');

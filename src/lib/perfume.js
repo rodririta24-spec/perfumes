@@ -58,7 +58,21 @@ export function preparePerfume(input) {
 
 export const perfumeKey = (brand, name) => `${normalize(brand)}|${normalize(name)}`;
 
-export const importId = (p) => 'imp_' + perfumeKey(p.brand, p.name).replace(/[^a-z0-9|]+/g, '-').replace(/\|/g, '__') + '__' + p.concentration;
+export const importId = (p) => 'imp_' + encodeURIComponent(`${perfumeKey(p.brand, p.name)}|${p.concentration}`);
+
+// Errores de un cambio parcial permitido (solo favorite y status).
+export function validPatch(patch) {
+  if (!patch || typeof patch !== 'object') return ['Cambio no permitido'];
+  const keys = Object.keys(patch);
+  if (!keys.length) return ['Cambio vacío'];
+  const errors = [];
+  for (const k of keys) {
+    if (k === 'favorite') { if (typeof patch.favorite !== 'boolean') errors.push('favorite debe ser booleano'); }
+    else if (k === 'status') { if (patch.status !== 'owned' && patch.status !== 'wishlist') errors.push('status inválido'); }
+    else errors.push(`Cambio no permitido: ${k}`);
+  }
+  return errors;
+}
 
 export function findDuplicate(perfumes, data, exceptId = null) {
   const key = perfumeKey(data.brand, data.name);

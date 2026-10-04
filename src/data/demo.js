@@ -1,5 +1,5 @@
 // Backend en memoria con la misma interfaz que backend.js. Solo para probar en localhost con ?demo.
-import { preparePerfume, importId } from '../lib/perfume.js';
+import { preparePerfume, importId, validPatch } from '../lib/perfume.js';
 import { ValidationError } from '../lib/errors.js';
 import { DEMO_PERFUMES } from '../seed/demo-perfumes.js';
 
@@ -42,8 +42,8 @@ export async function updatePerfume(id, input) {
 }
 
 export async function patchPerfume(id, patch) {
-  const ok = Object.keys(patch).every((k) => (k === 'favorite' && typeof patch[k] === 'boolean') || (k === 'status' && (patch[k] === 'owned' || patch[k] === 'wishlist')));
-  if (!ok || !Object.keys(patch).length) throw new ValidationError(['Cambio no permitido']);
+  const errors = validPatch(patch);
+  if (errors.length) throw new ValidationError(errors);
   if (!perfumes.some((p) => p.id === id)) throw new Error('No existe');
   perfumes = perfumes.map((p) => (p.id === id ? { ...p, ...patch } : p));
   emit();
@@ -54,6 +54,7 @@ export async function removePerfume(id) {
   emit();
 }
 
+// Los llamadores deben pasar planImport(...).toAdd (nunca pisa perfumes existentes).
 export async function importPerfumes(items, onProgress = () => {}) {
   for (const data of items) {
     const rec = { id: importId(data), ...data };

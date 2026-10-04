@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseImport } from '../../src/lib/importer.js';
+import { parseImport, planImport } from '../../src/lib/importer.js';
+import { importId } from '../../src/lib/perfume.js';
 
 const ok = { brand: 'Lattafa', name: 'Asad', concentration: 'edp', _changes: ['x'] };
 
@@ -30,5 +31,22 @@ describe('parseImport', () => {
   });
   it('rejects non-lists', () => {
     expect(parseImport({ foo: 1 }).errors[0].errors).toEqual(['Se esperaba una lista de perfumes']);
+  });
+});
+
+describe('planImport', () => {
+  const mk = (name, concentration = 'EDP') => ({ brand: 'Lattafa', name, concentration });
+  it('splits into toAdd, existing and duplicates', () => {
+    const existingIds = new Set([importId(mk('Asad'))]);
+    const items = [mk('Asad'), mk('Khamrah'), mk('KHAMRAH'), mk('Yara')];
+    const { toAdd, existing, duplicates } = planImport(items, existingIds);
+    expect(toAdd).toEqual([items[1], items[3]]);
+    expect(existing).toEqual([items[0]]);
+    expect(duplicates).toEqual([items[2]]);
+  });
+  it('different concentration is not a duplicate', () => {
+    const { toAdd, duplicates } = planImport([mk('A', 'EDP'), mk('A', 'EDT')], new Set());
+    expect(toAdd).toHaveLength(2);
+    expect(duplicates).toHaveLength(0);
   });
 });

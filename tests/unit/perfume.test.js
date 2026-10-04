@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { preparePerfume, perfumeKey, findDuplicate, fragranticaUrl, importId } from '../../src/lib/perfume.js';
+import { preparePerfume, perfumeKey, findDuplicate, fragranticaUrl, importId, validPatch } from '../../src/lib/perfume.js';
 
 const base = { brand: ' Lattafa ', name: 'Khamrah  Qahwa', concentration: 'edp' };
 
@@ -90,6 +90,10 @@ describe('fragranticaUrl', () => {
 });
 
 describe('importId', () => {
+  it('distinguishes non-latin names under the same brand', () => {
+    expect(importId({ brand: 'Lattafa', name: 'عود', concentration: 'EDP' }))
+      .not.toBe(importId({ brand: 'Lattafa', name: 'مسك', concentration: 'EDP' }));
+  });
   it('is the same for case/accent variants', () => {
     expect(importId({ brand: 'Lattafa', name: 'Asad', concentration: 'EDP' }))
       .toBe(importId({ brand: 'LATTÁFA', name: 'asad', concentration: 'EDP' }));
@@ -100,5 +104,19 @@ describe('importId', () => {
   });
   it('never contains a slash', () => {
     expect(importId({ brand: 'A/B', name: 'C/D / E', concentration: 'EDP' })).not.toContain('/');
+  });
+});
+
+describe('validPatch', () => {
+  it('accepts favorite boolean and status', () => {
+    expect(validPatch({ favorite: true })).toEqual([]);
+    expect(validPatch({ status: 'wishlist', favorite: false })).toEqual([]);
+  });
+  it('rejects unknown keys, bad values and empty patch', () => {
+    expect(validPatch({ brand: 'X' }).length).toBeGreaterThan(0);
+    expect(validPatch({ favorite: 'yes' }).length).toBeGreaterThan(0);
+    expect(validPatch({ status: 'other' }).length).toBeGreaterThan(0);
+    expect(validPatch({}).length).toBeGreaterThan(0);
+    expect(validPatch(null).length).toBeGreaterThan(0);
   });
 });

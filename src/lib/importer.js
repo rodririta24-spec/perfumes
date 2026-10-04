@@ -1,4 +1,4 @@
-import { preparePerfume } from './perfume.js';
+import { preparePerfume, importId } from './perfume.js';
 
 export function parseImport(json) {
   const list = Array.isArray(json) ? json : json?.perfumes;
@@ -15,4 +15,17 @@ export function parseImport(json) {
     else items.push(data);
   });
   return { items, errors };
+}
+
+// existingIds: Set con los ids ya presentes. Devuelve qué agregar, qué ya existe y qué se repite dentro del archivo.
+export function planImport(items, existingIds) {
+  const toAdd = [], existing = [], duplicates = [];
+  const seen = new Set();
+  for (const item of items) {
+    const id = importId(item);
+    if (seen.has(id)) { duplicates.push(item); continue; }
+    seen.add(id);
+    (existingIds.has(id) ? existing : toAdd).push(item);
+  }
+  return { toAdd, existing, duplicates };
 }
