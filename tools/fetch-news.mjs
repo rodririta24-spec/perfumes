@@ -13,6 +13,11 @@ const QUERIES = [
 ];
 const MAX_ITEMS = 80;
 
+// Solo lanzamientos: el título tiene que hablar de lanzar/presentar algo nuevo y no ser oferta, ranking ni nota de dupes.
+const LAUNCH = /\b(launch(es|ed|ing)?|unveil(s|ed)?|debut(s|ed)?|introduc(es|ed|ing)|releas(es|ed)|reveals?|drops|new (fragrance|scent|perfume|cologne|eau de)|lanza(miento|ron|rá|)?|lanzó|presenta(ron)?|estrena|nuevo perfume|nueva fragancia|nueva colonia)\b/i;
+const NOISE = /\b(deal|deals|sale|discount|half price|cheap|dupes?|bargain|offer|black friday|amazon|boots|superdrug|best|favou?rites?|top \d+|\d+ (best|favorite)|ranking|oferta|descuento|rebaja|barat[oa]s?|los mejores|las mejores|que (dura|huele)|clon(es)?)\b|[£€$]\s?\d/i;
+const isLaunch = (title) => LAUNCH.test(title) && !NOISE.test(title);
+
 const decode = (s) => s
   .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
@@ -49,7 +54,7 @@ if (!all.length) {
 
 const seen = new Set();
 const items = all
-  .filter((x) => x.title && x.link)
+  .filter((x) => x.title && x.link && isLaunch(x.title))
   .sort((a, b) => b.date.localeCompare(a.date))
   .filter((x) => {
     const k = x.title.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, ' ').trim();
