@@ -53,6 +53,19 @@ export function renderImporter(view, api, { fromData = false } = {}) {
     const backfill = existing
       .map((item) => ({ item, doc: byKey.get(importId(item)) }))
       .filter(({ doc }) => doc && doc.addedAt == null);
+    // Completar campos vacíos de los ya cargados (nunca pisa datos existentes).
+    const FILLABLE = ['dupeOf', 'familyMain', 'familySecondary', 'notes', 'seasons', 'occasions', 'timeOfDay'];
+    const isEmpty = (v) => v == null || (Array.isArray(v) && !v.length);
+    const fills = existing
+      .map((item) => ({ item, doc: byKey.get(importId(item)) }))
+      .filter(({ doc }) => doc)
+      .map(({ item, doc }) => ({ doc, patch: Object.fromEntries(FILLABLE.filter((k) => isEmpty(doc[k]) && !isEmpty(item[k])).map((k) => [k, item[k]])) }))
+      .filter(({ patch }) => Object.keys(patch).length);
+    if (fills.length) {
+      await Promise.all(fills.map(({ doc, patch }) => api.backend.updatePerfume(doc.id, { ...doc, ...patch })))
+        .catch((x) => toast(errorMessage(x), 'error'));
+      toast(`Se completaron datos vacíos en ${fills.length} perfumes`, 'success');
+    }
     if (backfill.length) {
       await Promise.all(backfill.map(({ item, doc }) => api.backend.patchPerfume(doc.id, { addedAt: item.addedAt })))
         .catch((x) => toast(errorMessage(x), 'error'));
