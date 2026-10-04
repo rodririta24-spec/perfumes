@@ -50,8 +50,25 @@ function toolbarHTML(mode, vs, perfumes) {
         </div>
       </details>
     </section>
-    <p class="summary-line" id="summary" aria-live="polite"></p>
-    <section class="grid" id="results"></section>`;
+    <div class="summary-row">
+      <p class="summary-line" id="summary" aria-live="polite"></p>
+      <div class="view-toggle" role="group" aria-label="Vista">
+        <button type="button" class="icon-btn" data-layout="grid" aria-label="Ver como tarjetas" title="Tarjetas">▦</button>
+        <button type="button" class="icon-btn" data-layout="list" aria-label="Ver como lista" title="Lista">☰</button>
+      </div>
+    </div>
+    <section class="grid${getLayout() === 'list' ? ' list' : ''}" id="results"></section>`;
+}
+
+// Preferencia de vista (tarjetas/lista) por navegador.
+function getLayout() {
+  try { return localStorage.getItem('layout') === 'list' ? 'list' : 'grid'; } catch { return 'grid'; }
+}
+
+function applyLayout(view, layout) {
+  try { localStorage.setItem('layout', layout); } catch { /* storage bloqueado */ }
+  view.querySelector('#results').classList.toggle('list', layout === 'list');
+  view.querySelectorAll('[data-layout]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.layout === layout)));
 }
 
 export function renderCollection(view, api, mode, { fromData = false } = {}) {
@@ -101,6 +118,12 @@ function bind(view, api, mode) {
     }
   });
   tb.querySelector('details').addEventListener('toggle', (e) => { vs.advOpen = e.target.open; });
+
+  view.querySelector('.view-toggle').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-layout]');
+    if (b) applyLayout(view, b.dataset.layout);
+  });
+  applyLayout(view, getLayout());
 
   const results = view.querySelector('#results');
   const openCard = (card) => api.go(`#/p/${encodeURIComponent(card.dataset.id)}`);
