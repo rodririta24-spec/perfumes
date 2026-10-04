@@ -58,6 +58,8 @@ export function preparePerfume(input) {
 
 export const perfumeKey = (brand, name) => `${normalize(brand)}|${normalize(name)}`;
 
+export const importId = (p) => 'imp_' + perfumeKey(p.brand, p.name).replace(/[^a-z0-9|]+/g, '-').replace(/\|/g, '__') + '__' + p.concentration;
+
 export function findDuplicate(perfumes, data, exceptId = null) {
   const key = perfumeKey(data.brand, data.name);
   return perfumes.find((p) => p.id !== exceptId && p.concentration === data.concentration && perfumeKey(p.brand, p.name) === key) ?? null;

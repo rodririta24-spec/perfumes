@@ -5,7 +5,7 @@ import {
   collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, writeBatch,
 } from '../fs.js';
 import { firebaseConfig, OWNER_EMAIL } from '../config.js';
-import { preparePerfume } from '../lib/perfume.js';
+import { preparePerfume, importId } from '../lib/perfume.js';
 import { ValidationError } from '../lib/errors.js';
 import { chunk } from '../lib/chunk.js';
 
@@ -15,7 +15,11 @@ const auth = getAuth(app);
 const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
 const col = collection(db, 'perfumes');
 
-export const login = () => signInWithPopup(auth, new GoogleAuthProvider());
+export const login = () => {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  return signInWithPopup(auth, provider);
+};
 export const logout = () => signOut(auth);
 export const onUser = (cb) => onAuthStateChanged(auth, cb);
 export const isOwner = (user) => !!user?.emailVerified && user.email?.toLowerCase() === OWNER_EMAIL;
@@ -37,19 +41,24 @@ export function createPerfume(input) {
   return { id: ref.id, done: setDoc(ref, { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }) };
 }
 
-export function updatePerfume(id, input) {
+export async function updatePerfume(id, input) {
   const data = validated(input);
   return updateDoc(doc(col, id), { ...data, updatedAt: serverTimestamp() });
 }
 
-export const patchPerfume = (id, patch) => updateDoc(doc(col, id), { ...patch, updatedAt: serverTimestamp() });
+export async function patchPerfume(id, patch) {
+  const ok = Object.keys(patch).every((k) => (k === 'favorite' && typeof patch[k] === 'boolean') || (k === 'status' && (patch[k] === 'owned' || patch[k] === 'wishlist')));
+  if (!ok || !Object.keys(patch).length) throw new ValidationError(['Cambio no permitido']);
+  return updateDoc(doc(col, id), { ...patch, updatedAt: serverTimestamp() });
+}
 export const removePerfume = (id) => deleteDoc(doc(col, id));
 
 export async function importPerfumes(items, onProgress = () => {}) {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('Sin conexión: conectate a internet para importar.');
   let done = 0;
-  for (const part of chunk(items, 400)) {
+  for (const part of chunk(items, 200)) {
     const batch = writeBatch(db);
-    for (const data of part) batch.set(doc(col), { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    for (const data of part) batch.set(doc(col, importId(data)), { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
     await batch.commit();
     done += part.length;
     onProgress(done);

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { preparePerfume, perfumeKey, findDuplicate, fragranticaUrl } from '../../src/lib/perfume.js';
+import { preparePerfume, perfumeKey, findDuplicate, fragranticaUrl, importId } from '../../src/lib/perfume.js';
 
 const base = { brand: ' Lattafa ', name: 'Khamrah  Qahwa', concentration: 'edp' };
 
@@ -86,5 +86,19 @@ describe('fragranticaUrl', () => {
   it('uses DuckDuckGo "\\" to jump to the first fragrantica result', () => {
     expect(fragranticaUrl({ brand: 'Lattafa', name: 'Khamrah' }))
       .toBe('https://duckduckgo.com/?q=' + encodeURIComponent('\\site:fragrantica.com Lattafa Khamrah'));
+  });
+});
+
+describe('importId', () => {
+  it('is the same for case/accent variants', () => {
+    expect(importId({ brand: 'Lattafa', name: 'Asad', concentration: 'EDP' }))
+      .toBe(importId({ brand: 'LATTÁFA', name: 'asad', concentration: 'EDP' }));
+  });
+  it('differs by concentration', () => {
+    expect(importId({ brand: 'A', name: 'B', concentration: 'EDP' }))
+      .not.toBe(importId({ brand: 'A', name: 'B', concentration: 'EDT' }));
+  });
+  it('never contains a slash', () => {
+    expect(importId({ brand: 'A/B', name: 'C/D / E', concentration: 'EDP' })).not.toContain('/');
   });
 });

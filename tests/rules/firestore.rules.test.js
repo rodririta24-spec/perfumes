@@ -35,6 +35,9 @@ describe('owner', () => {
   it('unverified email is denied', async () => {
     await assertFails(getDoc(doc(as(OWNER, false), 'perfumes/p1')));
   });
+  it('subcollections under perfumes are closed', async () => {
+    await assertFails(setDoc(doc(as(OWNER), 'perfumes/p1/x/y'), { a: 1 }));
+  });
   it('other collections are closed', async () => {
     await assertFails(setDoc(doc(as(OWNER), 'otra/x'), { a: 1 }));
   });
@@ -45,6 +48,9 @@ describe('others', () => {
     const db = as('otro@example.com');
     await assertFails(getDocs(collection(db, 'perfumes')));
     await assertFails(setDoc(doc(db, 'perfumes/x'), { brand: 'X' }));
+  });
+  it('unauthenticated cannot write', async () => {
+    await assertFails(setDoc(doc(env.unauthenticatedContext().firestore(), 'perfumes/x'), { brand: 'X' }));
   });
   it('unauthenticated cannot read', async () => {
     await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(), 'perfumes/p1')));
