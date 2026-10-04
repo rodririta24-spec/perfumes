@@ -6,8 +6,12 @@ export function parseImport(json) {
   const items = [];
   const errors = [];
   list.forEach((raw, index) => {
-    const { errors: e, data } = preparePerfume(raw ?? {});
-    if (e.length) errors.push({ index, label: `${raw?.brand ?? '?'} ${raw?.name ?? ''}`.trim(), errors: e });
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      errors.push({ index, label: '?', errors: ['Entrada inválida'] });
+      return;
+    }
+    const { errors: e, data } = preparePerfume(raw);
+    if (e.length) errors.push({ index, label: `${raw.brand ?? '?'} ${raw.name ?? ''}`.trim(), errors: e });
     else items.push(data);
   });
   return { items, errors };

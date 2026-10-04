@@ -44,6 +44,23 @@ describe('preparePerfume', () => {
   it('dedupes notes ignoring case/accents and keeps order', () => {
     expect(preparePerfume({ ...base, notes: ['Café', 'cafe', ' Vainilla ', ''] }).data.notes).toEqual(['Café', 'Vainilla']);
   });
+  it('malformed list fields become [] without throwing', () => {
+    for (const bad of ['x', 5, true, {}, null]) {
+      const { data } = preparePerfume({ ...base, dupeOf: bad, seasons: bad, occasions: bad, notes: bad });
+      expect(data.dupeOf).toEqual([]);
+      expect(data.seasons).toEqual([]);
+      expect(data.occasions).toEqual([]);
+      expect(data.notes).toEqual([]);
+    }
+    expect(preparePerfume({ ...base, seasons: 'todo_el_anio verano' }).data.seasons).toEqual([]);
+  });
+  it('skips non-string notes and non-object dupeOf items', () => {
+    expect(preparePerfume({ ...base, notes: ['Café', 5, null, {}] }).data.notes).toEqual(['Café']);
+    expect(preparePerfume({ ...base, dupeOf: ['x', 5, null, { brand: 'A', name: 'B' }] }).data.dupeOf).toEqual([{ brand: 'A', name: 'B' }]);
+  });
+  it('rating only accepts numbers or strings', () => {
+    expect(preparePerfume({ ...base, rating: true }).data.rating).toBeNull();
+  });
   it('ignores unknown fields like _changes', () => {
     expect(preparePerfume({ ...base, _changes: ['x'] }).data).not.toHaveProperty('_changes');
   });

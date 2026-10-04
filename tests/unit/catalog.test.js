@@ -24,6 +24,9 @@ describe('searchOptions', () => {
     expect(searchOptions(opts, 'arm')).toEqual(['Armaf', 'Armani']);
     expect(searchOptions(opts, 'ttaf')).toEqual(['Lattafa']);
   });
+  it('respects limit on a non-empty query', () => {
+    expect(searchOptions(opts, 'a', 2)).toHaveLength(2);
+  });
   it('is accent-insensitive', () => {
     expect(searchOptions(['Café', 'Cacao'], 'cafe')).toEqual(['Café']);
   });

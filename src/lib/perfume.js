@@ -1,19 +1,22 @@
 import { CONCENTRATIONS, FAMILIES, SEASONS, OCCASIONS, TIMES } from './constants.js';
 import { cleanText, normalize } from './normalize.js';
 
+const arr = (v) => (Array.isArray(v) ? v : []);
 const has = (list, v) => list.some((o) => o.value === v);
 // Filtra a valores válidos, sin repetidos, en el orden del catálogo.
-const pickMany = (list, values) => list.filter((o) => (values ?? []).includes(o.value)).map((o) => o.value);
+const pickMany = (list, values) => list.filter((o) => arr(values).includes(o.value)).map((o) => o.value);
 
 function parseRating(v) {
-  const n = v === '' || v == null ? NaN : Number(v);
+  if (typeof v !== 'number' && typeof v !== 'string') return null;
+  const n = v === '' ? NaN : Number(v);
   return Number.isInteger(n) && n >= 1 && n <= 10 ? n : null;
 }
 
 function cleanNotes(notes) {
   const seen = new Set();
   const out = [];
-  for (const n of notes ?? []) {
+  for (const n of arr(notes)) {
+    if (typeof n !== 'string') continue;
     const c = cleanText(n);
     const k = normalize(c);
     if (!c || seen.has(k)) continue;
@@ -37,8 +40,9 @@ export function preparePerfume(input) {
     name,
     concentration: has(CONCENTRATIONS, input.concentration) ? input.concentration : null,
     status: input.status === 'wishlist' ? 'wishlist' : 'owned',
-    dupeOf: (input.dupeOf ?? [])
-      .map((d) => ({ brand: cleanText(d?.brand), name: cleanText(d?.name) }))
+    dupeOf: arr(input.dupeOf)
+      .filter((d) => d && typeof d === 'object')
+      .map((d) => ({ brand: cleanText(d.brand), name: cleanText(d.name) }))
       .filter((d) => d.brand && d.name),
     familyMain,
     familySecondary: secondary === familyMain ? null : secondary,

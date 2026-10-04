@@ -33,7 +33,7 @@ export function scorePerfume(p, { climate, occasion, daytime }) {
     w *= 2;
   }
   if (seasons.includes('todo_el_anio')) w *= 1.5;
-  if (p.timeOfDay) {
+  if (p.timeOfDay && daytime !== undefined) {
     const match = p.timeOfDay === 'ambos' || (p.timeOfDay === 'dia') === daytime;
     w *= match ? 1.5 : 0.5;
   }

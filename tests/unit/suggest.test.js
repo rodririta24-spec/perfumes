@@ -57,6 +57,10 @@ describe('scorePerfume', () => {
     expect(s({ timeOfDay: 'ambos' })).toBe(1.5);
     expect(s({ timeOfDay: 'noche' }, { daytime: false })).toBe(1.5);
   });
+  it('undefined daytime does not apply the time-of-day multiplier', () => {
+    expect(s({ timeOfDay: 'noche' }, { daytime: undefined })).toBe(1);
+    expect(s({ timeOfDay: 'dia' }, { daytime: undefined })).toBe(1);
+  });
   it('favorite and rating', () => {
     expect(s({ favorite: true })).toBe(2);
     expect(s({ rating: 10 })).toBeCloseTo(1.5);
@@ -86,6 +90,11 @@ describe('suggest', () => {
     const r = suggest(list, { ...ctx, exclude: new Set(['a', 'b', 'c']) }, seq([0])).map((p) => p.id);
     expect(r[0]).toBe('d');
     expect(r).toHaveLength(3);
+    expect(['a', 'b', 'c']).toContain(r[1]);
+    expect(['a', 'b', 'c']).toContain(r[2]);
+  });
+  it('returns [] when the occasion excludes every perfume', () => {
+    expect(suggest(list, { ...ctx, occasion: 'cita' })).toEqual([]);
   });
   it('empty collection gives no suggestions', () => {
     expect(suggest([], ctx)).toEqual([]);

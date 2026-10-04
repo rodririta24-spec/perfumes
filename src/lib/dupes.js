@@ -1,7 +1,6 @@
 import { perfumeKey } from './perfume.js';
-import { cleanText, compareText } from './normalize.js';
+import { cleanText, byBrandName } from './normalize.js';
 
-const byBrandName = (a, b) => compareText(a.brand, b.brand) || compareText(a.name, b.name);
 const owned = (perfumes) => perfumes.filter((p) => p.status === 'owned');
 
 // Índice clave(marca|nombre) → perfume de la colección (si hay varias concentraciones, gana el primero).

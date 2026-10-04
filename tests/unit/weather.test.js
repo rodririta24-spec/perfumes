@@ -12,6 +12,8 @@ describe('weatherLabel', () => {
     expect(weatherLabel(81).label).toBe('Lluvia');
     expect(weatherLabel(73).label).toBe('Nieve');
     expect(weatherLabel(95).label).toBe('Tormenta');
+    expect(weatherLabel(96).label).toBe('Tormenta');
+    expect(weatherLabel(99).label).toBe('Tormenta');
     expect(weatherLabel(999).label).toBe('Tormenta');
     expect(weatherLabel(20).label).toBe('Clima');
   });

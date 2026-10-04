@@ -1,5 +1,5 @@
 import { MOODS, moodOf } from './constants.js';
-import { normalize, compareText } from './normalize.js';
+import { normalize, compareText, byBrandName } from './normalize.js';
 
 export const EMPTY_FILTERS = {
   q: '', mood: '', season: '', occasion: '', favorites: false, onlyDupes: false,
@@ -30,7 +30,6 @@ export function filterPerfumes(perfumes, f) {
     && (!f.note || (p.notes ?? []).some((n) => normalize(n) === normalize(f.note))));
 }
 
-const byBrandName = (a, b) => compareText(a.brand, b.brand) || compareText(a.name, b.name);
 const SORTS = {
   brand: byBrandName,
   name: (a, b) => compareText(a.name, b.name) || compareText(a.brand, b.brand),

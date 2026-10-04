@@ -11,7 +11,9 @@ export function normalize(s) {
 
 export const cleanText = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
 
-export const compareText = (a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' });
+export const compareText = (a, b) => String(a ?? '').localeCompare(String(b ?? ''), 'es', { sensitivity: 'base' });
+
+export const byBrandName = (a, b) => compareText(a.brand, b.brand) || compareText(a.name, b.name);
 
 // Sin duplicados (por normalize), conserva la primera grafía, ordenado alfabéticamente.
 export function uniqueSorted(values) {

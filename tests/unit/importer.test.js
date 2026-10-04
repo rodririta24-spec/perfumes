@@ -19,6 +19,15 @@ describe('parseImport', () => {
     expect(r.items).toHaveLength(1);
     expect(r.errors).toEqual([{ index: 1, label: 'Armaf', errors: ['Falta el nombre'] }]);
   });
+  it('reports non-object entries as invalid and still imports valid ones', () => {
+    const r = parseImport([null, ok, 5, []]);
+    expect(r.items).toHaveLength(1);
+    expect(r.errors).toEqual([
+      { index: 0, label: '?', errors: ['Entrada inválida'] },
+      { index: 2, label: '?', errors: ['Entrada inválida'] },
+      { index: 3, label: '?', errors: ['Entrada inválida'] },
+    ]);
+  });
   it('rejects non-lists', () => {
     expect(parseImport({ foo: 1 }).errors[0].errors).toEqual(['Se esperaba una lista de perfumes']);
   });
