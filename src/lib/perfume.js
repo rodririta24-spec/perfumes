@@ -1,0 +1,64 @@
+import { CONCENTRATIONS, FAMILIES, SEASONS, OCCASIONS, TIMES } from './constants.js';
+import { cleanText, normalize } from './normalize.js';
+
+const has = (list, v) => list.some((o) => o.value === v);
+// Filtra a valores válidos, sin repetidos, en el orden del catálogo.
+const pickMany = (list, values) => list.filter((o) => (values ?? []).includes(o.value)).map((o) => o.value);
+
+function parseRating(v) {
+  const n = v === '' || v == null ? NaN : Number(v);
+  return Number.isInteger(n) && n >= 1 && n <= 10 ? n : null;
+}
+
+function cleanNotes(notes) {
+  const seen = new Set();
+  const out = [];
+  for (const n of notes ?? []) {
+    const c = cleanText(n);
+    const k = normalize(c);
+    if (!c || seen.has(k)) continue;
+    seen.add(k);
+    out.push(c);
+  }
+  return out;
+}
+
+export function preparePerfume(input) {
+  const errors = [];
+  const brand = cleanText(input.brand);
+  const name = cleanText(input.name);
+  if (!brand) errors.push('Falta la marca');
+  if (!name) errors.push('Falta el nombre');
+  if (!has(CONCENTRATIONS, input.concentration)) errors.push('Elegí la concentración');
+  const familyMain = has(FAMILIES, input.familyMain) ? input.familyMain : null;
+  const secondary = has(FAMILIES, input.familySecondary) ? input.familySecondary : null;
+  const data = {
+    brand,
+    name,
+    concentration: has(CONCENTRATIONS, input.concentration) ? input.concentration : null,
+    status: input.status === 'wishlist' ? 'wishlist' : 'owned',
+    dupeOf: (input.dupeOf ?? [])
+      .map((d) => ({ brand: cleanText(d?.brand), name: cleanText(d?.name) }))
+      .filter((d) => d.brand && d.name),
+    familyMain,
+    familySecondary: secondary === familyMain ? null : secondary,
+    notes: cleanNotes(input.notes),
+    seasons: pickMany(SEASONS, input.seasons),
+    occasions: pickMany(OCCASIONS, input.occasions),
+    timeOfDay: has(TIMES, input.timeOfDay) ? input.timeOfDay : null,
+    rating: parseRating(input.rating),
+    favorite: input.favorite === true,
+  };
+  return { errors, data };
+}
+
+export const perfumeKey = (brand, name) => `${normalize(brand)}|${normalize(name)}`;
+
+export function findDuplicate(perfumes, data, exceptId = null) {
+  const key = perfumeKey(data.brand, data.name);
+  return perfumes.find((p) => p.id !== exceptId && p.concentration === data.concentration && perfumeKey(p.brand, p.name) === key) ?? null;
+}
+
+// Fragrantica no permite armar el link directo sin el id numérico: DuckDuckGo con "\" salta al primer resultado.
+export const fragranticaUrl = (p) =>
+  'https://duckduckgo.com/?q=' + encodeURIComponent(`\\site:fragrantica.com ${p.brand} ${p.name}`);
