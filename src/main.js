@@ -57,7 +57,7 @@ const api = {
   currentRoute: parseHash,
 };
 
-const hasDirtyForm = () => !!document.querySelector('#view form[data-dirty="1"]');
+const hasDirtyForm = () => !!document.querySelector('#view form[data-dirty="1"], #dialog form[data-dirty="1"]');
 const confirmDiscard = () => !hasDirtyForm() || confirm('¿Descartar los cambios sin guardar?');
 const logout = () => { if (confirmDiscard()) backend.logout(); };
 

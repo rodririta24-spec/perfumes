@@ -31,7 +31,10 @@ export function openDialog(html, { wide = false } = {}) {
   initDialog(dlg);
   dlg.className = wide ? 'wide' : '';
   dlg.innerHTML = html;
-  dlg.querySelectorAll('[data-close]').forEach((b) => (b.onclick = closeDialog));
+  dlg.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => {
+    if (dlg.querySelector('form[data-dirty="1"]') && !confirm('¿Descartar los cambios sin guardar?')) return;
+    closeDialog();
+  }));
   if (!dlg.open) dlg.showModal();
   return dlg;
 }

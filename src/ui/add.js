@@ -1,6 +1,7 @@
 import { openDialog, closeDialog, toast, errorMessage } from './dom.js';
 import { perfumeFieldsHTML, mountPerfumeFields } from './form.js';
 import { preparePerfume, findDuplicate } from '../lib/perfume.js';
+import { filterPerfumes } from '../lib/filters.js';
 import { labelOf, CONCENTRATIONS } from '../lib/constants.js';
 
 export function openAddDialog(api) {
@@ -29,13 +30,21 @@ export function openAddDialog(api) {
       return;
     }
     const dup = findDuplicate(api.perfumes, data);
-    if (dup && !confirm(`Ya tenés ${dup.brand} ${dup.name} (${labelOf(CONCENTRATIONS, dup.concentration)}). ¿Agregarlo igual?`)) return;
+    if (dup) {
+      const what = `${dup.brand} ${dup.name} (${labelOf(CONCENTRATIONS, dup.concentration)})`;
+      const msg = dup.status === 'wishlist' ? `Ya está en tu wishlist: ${what}. ¿Agregarlo igual?` : `Ya tenés ${what}. ¿Agregarlo igual?`;
+      if (!confirm(msg)) return;
+    }
     try {
-      const { done } = api.backend.createPerfume(input);
+      const { done } = api.backend.createPerfume(data);
       done.catch((x) => toast(errorMessage(x), 'error'));
       delete form.dataset.dirty;
       closeDialog();
-      toast(`${data.name} agregado`, 'success');
+      const route = api.currentRoute().name;
+      const mode = route === 'coleccion' ? 'owned' : route === 'wishlist' ? 'wishlist' : null;
+      const vs = mode && api.state.views[mode];
+      const hidden = vs && mode === data.status && filterPerfumes([{ id: 'new', ...data }], vs.filters).length === 0;
+      toast(`${data.name} agregado${hidden ? ' (oculto por los filtros)' : ''}`, 'success');
     } catch (x) {
       errorEl.textContent = errorMessage(x);
       errorEl.hidden = false;
