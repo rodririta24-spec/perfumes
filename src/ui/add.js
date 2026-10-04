@@ -1,6 +1,6 @@
 import { openDialog, closeDialog, toast, errorMessage } from './dom.js';
 import { perfumeFieldsHTML, mountPerfumeFields } from './form.js';
-import { preparePerfume, findDuplicate } from '../lib/perfume.js';
+import { preparePerfume, findDuplicate, fragranticaUrl } from '../lib/perfume.js';
 import { filterPerfumes } from '../lib/filters.js';
 import { labelOf, CONCENTRATIONS } from '../lib/constants.js';
 
@@ -9,7 +9,7 @@ export function openAddDialog(api) {
   const dlg = openDialog(`
     <h2>Agregar perfume</h2>
     <form id="add-form" class="pform" novalidate>
-      ${perfumeFieldsHTML({ status }, { collapsed: true })}
+      ${perfumeFieldsHTML({ status })}
       <p class="form-error" hidden></p>
       <div class="form-actions">
         <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
@@ -20,6 +20,26 @@ export function openAddDialog(api) {
   const errorEl = form.querySelector('.form-error');
   const fields = mountPerfumeFields(form, { status }, { brands: api.brands, notes: api.notes });
   fields.focusBrand();
+
+  // "Ver en Fragrantica" con la marca y el nombre que se van cargando, para completar el resto mirando la ficha.
+  const frag = document.createElement('a');
+  frag.className = 'btn btn-small';
+  frag.target = '_blank';
+  frag.rel = 'noopener';
+  frag.textContent = 'Ver en Fragrantica ↗';
+  frag.href = '#';
+  frag.style.alignSelf = 'flex-start';
+  form.querySelector('input[name="name"]').closest('label').after(frag);
+  frag.addEventListener('click', (e) => {
+    const { brand, name } = fields.read();
+    if (!brand.trim() || !name.trim()) {
+      e.preventDefault();
+      toast('Primero cargá la marca y el nombre', 'info');
+      return;
+    }
+    frag.href = fragranticaUrl({ brand, name });
+  });
+
   form.onsubmit = (e) => {
     e.preventDefault();
     const input = fields.read();
