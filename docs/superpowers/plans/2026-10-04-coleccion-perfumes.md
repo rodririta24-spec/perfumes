@@ -2917,7 +2917,8 @@ export function renderDupes(view, api) {
 `src/ui/importer.js`:
 ```js
 import { esc } from '../lib/html.js';
-import { parseImport } from '../lib/importer.js';
+import { parseImport, planImport } from '../lib/importer.js';
+import { importId } from '../lib/perfume.js';
 import { errorMessage } from './dom.js';
 
 export function renderImporter(view, api) {
@@ -2946,12 +2947,21 @@ export function renderImporter(view, api) {
         <ul>${errors.slice(0, 20).map((x) => `<li>#${x.index + 1} ${esc(x.label)}: ${esc(x.errors.join(', '))}</li>`).join('')}</ul>`;
       return;
     }
-    const existing = api.perfumes.length;
-    if (!confirm(`¿Importar ${items.length} perfumes?${existing ? ` Ya tenés ${existing} cargados: se suman, no se reemplazan.` : ''}`)) return;
+    // Se compara por contenido (marca|nombre|concentración), no por id del documento: los cargados a mano tienen ids aleatorios.
+    const { toAdd, existing, duplicates } = planImport(items, new Set(api.perfumes.map(importId)));
+    const skipped = [
+      existing.length ? `${existing.length} ya estaban cargados (no se tocan)` : '',
+      duplicates.length ? `${duplicates.length} repetidos en el archivo` : '',
+    ].filter(Boolean).join(' y ');
+    if (!toAdd.length) {
+      out.innerHTML = `<p>No hay perfumes nuevos para importar${skipped ? `: ${esc(skipped)}` : ''}.</p>`;
+      return;
+    }
+    if (!confirm(`¿Importar ${toAdd.length} perfumes nuevos?${skipped ? ` Se saltean ${skipped}.` : ''}`)) return;
     out.innerHTML = '<p>Importando…</p>';
     try {
-      const n = await api.backend.importPerfumes(items, (done) => { out.innerHTML = `<p>Importando… ${done}/${items.length}</p>`; });
-      out.innerHTML = `<p class="ok">✔ ${n} perfumes importados.</p><a class="btn" href="#/coleccion">Ver colección</a>`;
+      const n = await api.backend.importPerfumes(toAdd, (done) => { out.innerHTML = `<p>Importando… ${done}/${toAdd.length}</p>`; });
+      out.innerHTML = `<p class="ok">✔ ${n} perfumes importados.${skipped ? ` Se saltearon ${esc(skipped)}.` : ''}</p><a class="btn" href="#/coleccion">Ver colección</a>`;
     } catch (x) {
       out.innerHTML = `<p class="form-error">${esc(errorMessage(x))}</p>`;
     }
