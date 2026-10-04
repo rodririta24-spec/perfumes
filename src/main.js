@@ -111,7 +111,7 @@ function route({ fromData = false } = {}) {
     case 'wishlist': return renderCollection(view, api, 'wishlist', opts);
     case 'dupes': return renderDupes(view, api, opts);
     case 'p': return renderDetail(view, api, r.id, opts);
-    case 'importar': return renderImporter(view, api);
+    case 'importar': return renderImporter(view, api, opts);
     default: return renderCollection(view, api, 'owned', opts);
   }
 }

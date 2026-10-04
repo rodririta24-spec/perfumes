@@ -142,6 +142,7 @@ export function renderDetail(view, api, id, { fromData = false, draft = null } =
     const setOwned = (owned) => {
       const radio = form.querySelector(`input[name="status"][value="${owned ? 'owned' : 'wishlist'}"]`);
       if (radio) radio.checked = true;
+      if (owned && bought.contains(document.activeElement)) favBtn.focus();
       bought.hidden = owned;
       bought.disabled = false;
       listHash = owned ? '#/coleccion' : '#/wishlist';
