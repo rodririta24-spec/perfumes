@@ -15,9 +15,17 @@ import { NOTE_SEED } from './seed/notes.js';
 
 // Modo demo: backend en memoria, solo en localhost con ?demo (el login de Google no anda en el Chrome de pruebas).
 const DEMO = ['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).has('demo');
-const backend = await import(DEMO ? './data/demo.js' : './data/backend.js');
-
 const app = document.getElementById('app');
+initTheme();
+let backend;
+try {
+  backend = await import(DEMO ? './data/demo.js' : './data/backend.js');
+} catch (e) {
+  console.error(e);
+  app.innerHTML = '<div class="center-screen"><div class="card"><h1>Mis Perfumes</h1><p>No se pudo cargar la app. Revisá la conexión y recargá.</p></div></div>';
+  throw e;
+}
+
 const state = {
   user: null,
   perfumes: [],
@@ -33,7 +41,9 @@ const state = {
 
 function parseHash() {
   const [name, id] = location.hash.replace(/^#\/?/, '').split('/');
-  return { name: name || 'coleccion', id: id ? decodeURIComponent(id) : null };
+  let decoded = id ?? null;
+  if (id) { try { decoded = decodeURIComponent(id); } catch { /* id mal formado: usar tal cual */ } }
+  return { name: name || 'coleccion', id: decoded };
 }
 
 const api = {
@@ -47,7 +57,9 @@ const api = {
   currentRoute: parseHash,
 };
 
-initTheme();
+const hasDirtyForm = () => !!document.querySelector('#view form[data-dirty="1"]');
+const confirmDiscard = () => !hasDirtyForm() || confirm('¿Descartar los cambios sin guardar?');
+const logout = () => { if (confirmDiscard()) backend.logout(); };
 
 backend.onUser((user) => {
   state.unsubscribe?.();
@@ -64,7 +76,7 @@ backend.onUser((user) => {
     return;
   }
   state.user = user;
-  renderShell(app, { email: user.email, demo: DEMO, onAdd: () => openAddDialog(api), onLogout: backend.logout });
+  renderShell(app, { email: user.email, demo: DEMO, onAdd: () => openAddDialog(api), onLogout: logout });
   route();
   state.unsubscribe = backend.subscribePerfumes(
     (list) => {
@@ -105,12 +117,22 @@ function route({ fromData = false } = {}) {
 }
 
 let currentHash = location.hash || '#/coleccion';
+let ignoreNextHash = false;
 addEventListener('hashchange', () => {
-  if (document.querySelector('#view form[data-dirty="1"]') && !confirm('¿Descartar los cambios sin guardar?')) {
-    history.replaceState(null, '', currentHash);
+  if (ignoreNextHash) {
+    ignoreNextHash = false;
+    return;
+  }
+  if (!confirmDiscard()) {
+    ignoreNextHash = true;
+    location.hash = currentHash;
     return;
   }
   currentHash = location.hash;
   window.scrollTo(0, 0);
   route();
+});
+
+addEventListener('beforeunload', (e) => {
+  if (hasDirtyForm()) e.preventDefault();
 });

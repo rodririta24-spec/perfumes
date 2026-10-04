@@ -16,8 +16,19 @@ export function errorMessage(err) {
   return err?.message || 'Ocurrió un error inesperado.';
 }
 
+let dialogReady = false;
+function initDialog(dlg) {
+  if (dialogReady) return;
+  dialogReady = true;
+  dlg.addEventListener('close', () => { dlg.innerHTML = ''; });
+  dlg.addEventListener('cancel', (e) => {
+    if (dlg.querySelector('form[data-dirty="1"]') && !confirm('¿Descartar los cambios sin guardar?')) e.preventDefault();
+  });
+}
+
 export function openDialog(html, { wide = false } = {}) {
   const dlg = $('#dialog');
+  initDialog(dlg);
   dlg.className = wide ? 'wide' : '';
   dlg.innerHTML = html;
   dlg.querySelectorAll('[data-close]').forEach((b) => (b.onclick = closeDialog));

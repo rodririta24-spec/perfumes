@@ -20,7 +20,7 @@ export const MOODS = [
 ];
 
 export const FAMILIES = [
-  { value: 'citrico', label: 'Cítrico', mood: 'fresco', color: '#c99a00' },
+  { value: 'citrico', label: 'Cítrico', mood: 'fresco', color: '#a67f00' },
   { value: 'acuatico', label: 'Acuático', mood: 'fresco', color: '#1e88c8' },
   { value: 'aromatico', label: 'Aromático', mood: 'fresco', color: '#4f9a6a' },
   { value: 'verde', label: 'Verde', mood: 'fresco', color: '#3a8f35' },

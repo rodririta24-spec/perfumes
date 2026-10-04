@@ -8,6 +8,8 @@ const selectOptions = (list, sel, empty) =>
 const toggles = (type, name, list, isOn) =>
   `<div class="check-chips">${list.map((o) => `<label class="cchip"><input type="${type}" name="${name}" value="${esc(o.value)}"${isOn(o.value) ? ' checked' : ''}><span>${esc(o.label)}</span></label>`).join('')}</div>`;
 
+const group = (legend, inner) => `<fieldset class="field"><legend class="field-label">${legend}</legend>${inner}</fieldset>`;
+
 export function perfumeFieldsHTML(p = {}, { collapsed = false } = {}) {
   const optional = `
     <div class="field"><span class="field-label">Dupe de</span><div class="dupes-edit"></div>
@@ -17,9 +19,9 @@ export function perfumeFieldsHTML(p = {}, { collapsed = false } = {}) {
       <label>Familia secundaria<select name="familySecondary">${selectOptions(FAMILIES, p.familySecondary, 'Ninguna')}</select></label>
     </div>
     <div class="field"><span class="field-label">Notas</span><div class="notes-picker"></div></div>
-    <div class="field"><span class="field-label">Temporada</span>${toggles('checkbox', 'seasons', SEASONS, (v) => (p.seasons ?? []).includes(v))}</div>
-    <div class="field"><span class="field-label">Ocasión</span>${toggles('checkbox', 'occasions', OCCASIONS, (v) => (p.occasions ?? []).includes(v))}</div>
-    <div class="field"><span class="field-label">Momento</span>${toggles('radio', 'timeOfDay', TIMES, (v) => p.timeOfDay === v)}</div>
+    ${group('Temporada', toggles('checkbox', 'seasons', SEASONS, (v) => (p.seasons ?? []).includes(v)))}
+    ${group('Ocasión', toggles('checkbox', 'occasions', OCCASIONS, (v) => (p.occasions ?? []).includes(v)))}
+    ${group('Momento', toggles('radio', 'timeOfDay', [{ value: '', label: 'Sin definir' }, ...TIMES], (v) => (p.timeOfDay ?? '') === v))}
     <div class="row-2">
       <label>Puntuación<select name="rating"><option value="">Sin puntuar</option>${
         Array.from({ length: 10 }, (_, i) => i + 1).map((n) => `<option value="${n}"${p.rating === n ? ' selected' : ''}>${n}</option>`).join('')
@@ -31,24 +33,25 @@ export function perfumeFieldsHTML(p = {}, { collapsed = false } = {}) {
     <label>Nombre *<input name="name" value="${esc(p.name)}" autocomplete="off"></label>
     <div class="row-2">
       <label>Concentración *<select name="concentration">${selectOptions(CONCENTRATIONS, p.concentration, 'Elegir…')}</select></label>
-      <div class="field"><span class="field-label">Estado</span>${toggles('radio', 'status', STATUSES, (v) => (p.status ?? 'owned') === v)}</div>
+      ${group('Estado', toggles('radio', 'status', STATUSES, (v) => (p.status ?? 'owned') === v))}
     </div>
     ${collapsed ? `<details class="more"><summary>Más datos (opcional)</summary>${optional}</details>` : optional}`;
 }
 
-export function mountPerfumeFields(form, p = {}, { brands, notes, onDirty = () => {} }) {
-  const brand = createPicker(form.querySelector('.brand-picker'), { options: brands, value: p.brand ?? '', placeholder: 'Buscar marca…', onChange: onDirty });
+export function mountPerfumeFields(form, p = {}, { brands, notes, onDirty: userDirty = () => {} }) {
+  const onDirty = () => { form.dataset.dirty = '1'; userDirty(); };
+  const brand = createPicker(form.querySelector('.brand-picker'), { options: brands, value: p.brand ?? '', placeholder: 'Buscar marca…', ariaLabel: 'Marca', onChange: onDirty });
   const notePicker = createPicker(form.querySelector('.notes-picker'), {
-    options: notes, value: p.notes ?? [], multiple: true, placeholder: 'Buscar nota… (ej: vainilla)', onChange: onDirty,
+    options: notes, value: p.notes ?? [], multiple: true, placeholder: 'Buscar nota… (ej: vainilla)', ariaLabel: 'Notas', onChange: onDirty,
   });
   const dupeBox = form.querySelector('.dupes-edit');
   const dupeRows = [];
   const addDupeRow = (d = { brand: '', name: '' }) => {
     const row = document.createElement('div');
     row.className = 'dupe-row';
-    row.innerHTML = `<div class="dupe-brand"></div><input class="dupe-name" placeholder="Perfume original" value="${esc(d.name)}" autocomplete="off"><button type="button" class="icon-btn" aria-label="Quitar original">✕</button>`;
+    row.innerHTML = `<div class="dupe-brand"></div><input class="dupe-name" aria-label="Perfume original" placeholder="Perfume original" value="${esc(d.name)}" autocomplete="off"><button type="button" class="icon-btn" aria-label="Quitar original">✕</button>`;
     dupeBox.append(row);
-    const entry = { row, brand: createPicker(row.querySelector('.dupe-brand'), { options: brands, value: d.brand, placeholder: 'Marca original', onChange: onDirty }) };
+    const entry = { row, brand: createPicker(row.querySelector('.dupe-brand'), { options: brands, value: d.brand, placeholder: 'Marca original', ariaLabel: 'Marca original', onChange: onDirty }) };
     dupeRows.push(entry);
     row.querySelector('.icon-btn').onclick = () => {
       row.remove();
@@ -80,7 +83,7 @@ export function mountPerfumeFields(form, p = {}, { brands, notes, onDirty = () =
         notes: notePicker.value,
         seasons: checked('seasons'),
         occasions: checked('occasions'),
-        timeOfDay: checked('timeOfDay')[0] ?? null,
+        timeOfDay: checked('timeOfDay')[0] || null,
         rating: f.namedItem('rating').value,
         favorite: f.namedItem('favorite').checked,
       };
