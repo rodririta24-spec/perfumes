@@ -31,8 +31,8 @@ const state = {
   perfumes: [],
   loaded: false,
   views: {
-    owned: { filters: { ...EMPTY_FILTERS }, sort: 'brand', advOpen: false },
-    wishlist: { filters: { ...EMPTY_FILTERS }, sort: 'brand', advOpen: false },
+    owned: { filters: { ...EMPTY_FILTERS }, sort: 'recent', advOpen: false },
+    wishlist: { filters: { ...EMPTY_FILTERS }, sort: 'recent', advOpen: false },
   },
   today: { occasion: 'diario', weather: null, shown: [], rolledClimate: null },
   dupesQuery: '',

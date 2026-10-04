@@ -9,6 +9,8 @@ const SORTS = [
   { value: 'brand', label: 'Marca' },
   { value: 'name', label: 'Nombre' },
   { value: 'rating', label: 'Puntuación' },
+  { value: 'recent', label: 'Más recientes primero' },
+  { value: 'oldest', label: 'Más antiguos primero' },
 ];
 const options = (list, sel, empty) =>
   `<option value="">${esc(empty)}</option>` + list.map((o) => `<option value="${esc(o.value)}"${o.value === sel ? ' selected' : ''}>${esc(o.label)}</option>`).join('');
@@ -112,7 +114,7 @@ function bind(view, api, mode) {
     }
     if (e.target.closest('[data-act="clear"]')) {
       vs.filters = { ...EMPTY_FILTERS };
-      vs.sort = 'brand';
+      vs.sort = 'recent';
       view.dataset.screen = '';
       renderCollection(view, api, mode);
     }

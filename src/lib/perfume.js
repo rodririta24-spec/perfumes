@@ -53,6 +53,8 @@ export function preparePerfume(input) {
     rating: parseRating(input.rating),
     favorite: input.favorite === true,
   };
+  // Orden de compra: solo se incluye si viene (así una edición no lo pisa con null).
+  if (isOrder(input.addedAt)) data.addedAt = input.addedAt;
   return { errors, data };
 }
 
@@ -60,7 +62,9 @@ export const perfumeKey = (brand, name) => `${normalize(brand)}|${normalize(name
 
 export const importId = (p) => 'imp_' + encodeURIComponent(`${perfumeKey(p.brand, p.name)}|${p.concentration}`);
 
-// Errores de un cambio parcial permitido (solo favorite y status).
+const isOrder = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+
+// Errores de un cambio parcial permitido (favorite, status y addedAt).
 export function validPatch(patch) {
   if (!patch || typeof patch !== 'object') return ['Cambio no permitido'];
   const keys = Object.keys(patch);
@@ -69,6 +73,7 @@ export function validPatch(patch) {
   for (const k of keys) {
     if (k === 'favorite') { if (typeof patch.favorite !== 'boolean') errors.push('favorite debe ser booleano'); }
     else if (k === 'status') { if (patch.status !== 'owned' && patch.status !== 'wishlist') errors.push('status inválido'); }
+    else if (k === 'addedAt') { if (!isOrder(patch.addedAt)) errors.push('addedAt inválido'); }
     else errors.push(`Cambio no permitido: ${k}`);
   }
   return errors;

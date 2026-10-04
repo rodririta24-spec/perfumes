@@ -1,5 +1,6 @@
 import { esc } from '../lib/html.js';
 import { parseImport, planImport, existingImportIds } from '../lib/importer.js';
+import { importId } from '../lib/perfume.js';
 import { errorMessage, toast } from './dom.js';
 
 let importing = false;
@@ -44,7 +45,19 @@ export function renderImporter(view, api, { fromData = false } = {}) {
           ${errors.length > 20 ? `<li>y ${errors.length - 20} más</li>` : ''}</ul>`);
       return;
     }
-    const { toAdd, existing, duplicates } = planImport(items, existingImportIds(api.perfumes));
+    // Orden de compra = fila en el archivo (la planilla estaba ordenada de más viejo a más nuevo).
+    const ordered = items.map((p, i) => ({ ...p, addedAt: p.addedAt ?? i + 1 }));
+    const { toAdd, existing, duplicates } = planImport(ordered, existingImportIds(api.perfumes));
+    // Los ya cargados sin orden de compra lo reciben del archivo (no se toca nada más).
+    const byKey = new Map(api.perfumes.flatMap((p) => [[importId(p), p], [p.id, p]]));
+    const backfill = existing
+      .map((item) => ({ item, doc: byKey.get(importId(item)) }))
+      .filter(({ doc }) => doc && doc.addedAt == null);
+    if (backfill.length) {
+      await Promise.all(backfill.map(({ item, doc }) => api.backend.patchPerfume(doc.id, { addedAt: item.addedAt })))
+        .catch((x) => toast(errorMessage(x), 'error'));
+      toast(`Orden de compra actualizado en ${backfill.length} perfumes`, 'success');
+    }
     const skipped = [
       existing.length ? `${existing.length} ya estaban cargados (no se tocan)` : '',
       duplicates.length ? `${duplicates.length} repetidos en el archivo` : '',

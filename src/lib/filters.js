@@ -33,6 +33,9 @@ export function filterPerfumes(perfumes, f) {
 const SORTS = {
   brand: byBrandName,
   name: (a, b) => compareText(a.name, b.name) || compareText(a.brand, b.brand),
+  // Orden de compra: addedAt (los importados usan su fila de la planilla, los nuevos Date.now()).
+  recent: (a, b) => (b.addedAt ?? -1) - (a.addedAt ?? -1) || byBrandName(a, b),
+  oldest: (a, b) => (a.addedAt ?? Infinity) - (b.addedAt ?? Infinity) || byBrandName(a, b),
   rating: (a, b) => (b.rating ?? 0) - (a.rating ?? 0) || byBrandName(a, b),
 };
 

@@ -120,3 +120,16 @@ describe('validPatch', () => {
     expect(validPatch(null).length).toBeGreaterThan(0);
   });
 });
+
+describe('addedAt', () => {
+  const b = { brand: 'Lattafa', name: 'Asad', concentration: 'edp' };
+  it('is kept only when valid, so edits never null it', () => {
+    expect(preparePerfume({ ...b, addedAt: 5 }).data.addedAt).toBe(5);
+    expect(preparePerfume(b).data).not.toHaveProperty('addedAt');
+    expect(preparePerfume({ ...b, addedAt: -1 }).data).not.toHaveProperty('addedAt');
+  });
+  it('can be patched', () => {
+    expect(validPatch({ addedAt: 3 })).toEqual([]);
+    expect(validPatch({ addedAt: 'x' })).not.toEqual([]);
+  });
+});

@@ -38,7 +38,7 @@ function validated(input) {
 export function createPerfume(input) {
   const data = validated(input);
   const ref = doc(col);
-  return { id: ref.id, done: setDoc(ref, { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }) };
+  return { id: ref.id, done: setDoc(ref, { addedAt: Date.now(), ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }) };
 }
 
 export async function updatePerfume(id, input) {

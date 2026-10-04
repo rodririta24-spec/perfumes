@@ -51,3 +51,13 @@ describe('summarize', () => {
     expect(summarize(P)).toEqual({ total: 3, byMood: { fresco: 1, calido: 1, floral: 0, amaderado: 0 }, noFamily: 1 });
   });
 });
+
+describe('purchase order', () => {
+  const L = [{ id: 'a', brand: 'A', name: 'x', addedAt: 2 }, { id: 'b', brand: 'B', name: 'y', addedAt: 1700000000000 }, { id: 'c', brand: 'C', name: 'z' }];
+  it('recent: newest first, without order last', () => {
+    expect(sortPerfumes(L, 'recent').map((p) => p.id)).toEqual(['b', 'a', 'c']);
+  });
+  it('oldest: oldest first, without order last', () => {
+    expect(sortPerfumes(L, 'oldest').map((p) => p.id)).toEqual(['a', 'b', 'c']);
+  });
+});

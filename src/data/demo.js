@@ -3,7 +3,7 @@ import { preparePerfume, importId, validPatch } from '../lib/perfume.js';
 import { ValidationError } from '../lib/errors.js';
 import { DEMO_PERFUMES } from '../seed/demo-perfumes.js';
 
-let perfumes = DEMO_PERFUMES.map((p, i) => ({ id: `demo${i}`, ...preparePerfume(p).data }));
+let perfumes = DEMO_PERFUMES.map((p, i) => ({ id: `demo${i}`, addedAt: i + 1, ...preparePerfume(p).data }));
 let listener = null;
 let seq = 1000;
 
@@ -29,7 +29,7 @@ export function subscribePerfumes(onData) {
 export function createPerfume(input) {
   const data = validated(input);
   const id = `demo${seq++}`;
-  perfumes.push({ id, ...data });
+  perfumes.push({ id, addedAt: Date.now(), ...data });
   emit();
   return { id, done: Promise.resolve() };
 }
@@ -37,7 +37,7 @@ export function createPerfume(input) {
 export async function updatePerfume(id, input) {
   const data = validated(input);
   if (!perfumes.some((p) => p.id === id)) throw new Error('No existe');
-  perfumes = perfumes.map((p) => (p.id === id ? { id, ...data } : p));
+  perfumes = perfumes.map((p) => (p.id === id ? { id, addedAt: p.addedAt, ...data } : p));
   emit();
 }
 
