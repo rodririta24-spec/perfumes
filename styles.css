@@ -137,19 +137,23 @@ fieldset.field > legend { padding: 0; margin-bottom: 6px; }
 .view-toggle .icon-btn { color: var(--muted); }
 .view-toggle .icon-btn[aria-pressed="true"] { color: var(--primary); background: var(--surface-2); }
 
-/* Vista lista: una fila por perfume */
-.grid.list { grid-template-columns: 1fr; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.grid.list .pcard { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 12px; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: none; padding: 9px 14px; }
-.grid.list .pcard:last-child { border-bottom: 0; }
-.grid.list .pcard:hover { background: var(--surface-2); }
-.grid.list .pcard-top { flex: 0 0 150px; gap: 4px; justify-content: flex-start; }
-.grid.list .pcard-name { flex: 1 1 200px; font-size: 15px; }
-.grid.list .pcard-meta { flex: none; }
-.grid.list .pcard-dupe { flex: 0 1 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.grid.list .pcard .btn { align-self: center; }
-@media (max-width: 600px) {
-  .grid.list .pcard-top { flex-basis: 100%; }
-  .grid.list .pcard-dupe { flex-basis: 100%; }
+/* Vista lista: tabla con columnas */
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.table-wrap > .empty { display: block; }
+.ptable { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ptable th, .ptable td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.ptable th { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface); position: sticky; top: 0; }
+.ptable tbody tr:last-child td { border-bottom: 0; }
+.ptable tbody tr { cursor: pointer; }
+.ptable tbody tr:hover { background: var(--surface-2); }
+.ptable .pcard-link { font-weight: 600; }
+.ptable .col-brand { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); white-space: nowrap; }
+.ptable .col-conc, .ptable .col-rating { color: var(--muted); white-space: nowrap; }
+.ptable .col-fam { white-space: nowrap; }
+.ptable .col-dupe { color: var(--muted); font-size: 13px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 768px) {
+  .ptable .col-conc, .ptable .col-rating, .ptable .col-dupe { display: none; }
+  .ptable th, .ptable td { padding: 8px 10px; }
 }
 
 .picker { position: relative; }

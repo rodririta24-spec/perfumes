@@ -2,7 +2,7 @@ import { esc } from '../lib/html.js';
 import { MOODS, SEASONS, OCCASIONS, FAMILIES, CONCENTRATIONS } from '../lib/constants.js';
 import { EMPTY_FILTERS, filterPerfumes, sortPerfumes, summarize } from '../lib/filters.js';
 import { uniqueSorted, normalize } from '../lib/normalize.js';
-import { perfumeCardHTML } from './card.js';
+import { perfumeCardHTML, perfumeTableHTML } from './card.js';
 import { toast, errorMessage } from './dom.js';
 
 const SORTS = [
@@ -59,7 +59,7 @@ function toolbarHTML(mode, vs, perfumes) {
         <button type="button" class="icon-btn" data-layout="list" aria-label="Ver como lista" title="Lista">☰</button>
       </div>
     </div>
-    <section class="grid${getLayout() === 'list' ? ' list' : ''}" id="results"></section>`;
+    <section class="grid" id="results"></section>`;
 }
 
 // Preferencia de vista (tarjetas/lista) por navegador.
@@ -69,7 +69,6 @@ function getLayout() {
 
 function applyLayout(view, layout) {
   try { localStorage.setItem('layout', layout); } catch { /* storage bloqueado */ }
-  view.querySelector('#results').classList.toggle('list', layout === 'list');
   view.querySelectorAll('[data-layout]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.layout === layout)));
 }
 
@@ -123,14 +122,16 @@ function bind(view, api, mode) {
 
   view.querySelector('.view-toggle').addEventListener('click', (e) => {
     const b = e.target.closest('[data-layout]');
-    if (b) applyLayout(view, b.dataset.layout);
+    if (!b) return;
+    applyLayout(view, b.dataset.layout);
+    renderResults(view, api, mode);
   });
   applyLayout(view, getLayout());
 
   const results = view.querySelector('#results');
   const openCard = (card) => api.go(`#/p/${encodeURIComponent(card.dataset.id)}`);
   results.addEventListener('click', (e) => {
-    const card = e.target.closest('.pcard');
+    const card = e.target.closest('.pcard, .prow');
     if (!card) return;
     const bought = e.target.closest('[data-bought]');
     if (bought) {
@@ -175,5 +176,7 @@ function renderResults(view, api, mode) {
     return;
   }
   const actions = mode === 'wishlist' ? '<button type="button" class="btn btn-small btn-primary" data-bought>¡Lo compré!</button>' : '';
-  res.innerHTML = rows.map((p) => perfumeCardHTML(p, { actions })).join('');
+  const list = getLayout() === 'list';
+  res.className = list ? 'table-wrap' : 'grid';
+  res.innerHTML = list ? perfumeTableHTML(rows, { actions }) : rows.map((p) => perfumeCardHTML(p, { actions })).join('');
 }
