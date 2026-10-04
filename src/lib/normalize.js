@@ -1,7 +1,7 @@
 // Clave de comparación: sin acentos, minúsculas, & = and, sin apóstrofes ni puntos, espacios colapsados.
 export function normalize(s) {
   return String(s ?? '')
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/&/g, ' and ')
     .replace(/['’`´.]/g, '')
