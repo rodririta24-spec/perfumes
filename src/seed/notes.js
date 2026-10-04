@@ -1,0 +1,21 @@
+// Notas comunes en español (estilo Fragrantica ES). El catálogo final = esto ∪ notas usadas en los perfumes.
+export const NOTE_SEED = [
+  'Abedul', 'Absenta', 'Acorde marino', 'Acorde acuoso', 'Acorde de ozono', 'Agua de mar', 'Akigalawood', 'Albahaca',
+  'Algodón de azúcar', 'Almendra', 'Almizcle', 'Almizcle blanco', 'Ámbar', 'Ámbar gris', 'Ambrette', 'Ambroxan', 'Anís',
+  'Anís estrellado', 'Azafrán', 'Azahar', 'Bálsamo de Perú', 'Bálsamo de Tolú', 'Benjuí', 'Bergamota', 'Cacao', 'Café',
+  'Canela', 'Caramelo', 'Cardamomo', 'Cashmeran', 'Castaña', 'Cedro', 'Cedro de Virginia', 'Cereza', 'Chocolate', 'Ciprés',
+  'Ciruela', 'Cistus', 'Clavel', 'Clavo de olor', 'Coco', 'Coñac', 'Comino', 'Cuero', 'Cúrcuma', 'Dátil', 'Elemi', 'Enebro',
+  'Estragón', 'Eucalipto', 'Frambuesa', 'Frutos rojos', 'Frutos negros', 'Gálbano', 'Gardenia', 'Geranio', 'Grosella negra',
+  'Guayaco', 'Haba tonka', 'Heliotropo', 'Helecho', 'Heno', 'Hierba', 'Higo', 'Hoja de higuera', 'Hoja de violeta', 'Iris',
+  'Incienso', 'Jazmín', 'Jengibre', 'Labdanum', 'Lavanda', 'Lavandín', 'Lima', 'Limón', 'Lirio de los valles', 'Litchi',
+  'Madera de cachemira', 'Madera de oud', 'Maderas ambarinas', 'Maderas cremosas', 'Mandarina', 'Mandarina verde', 'Mango',
+  'Manzana', 'Manzana verde', 'Melón', 'Menta', 'Menta piperita', 'Miel', 'Mirra', 'Musgo', 'Musgo de roble', 'Naranja',
+  'Naranja amarga', 'Narciso', 'Neroli', 'Nuez moscada', 'Olíbano', 'Orquídea', 'Osmanthus', 'Oud', 'Pachulí', 'Palisandro',
+  'Palo santo', 'Papiro', 'Pera', 'Petitgrain', 'Pimienta', 'Pimienta negra', 'Pimienta rosa', 'Pino', 'Piña', 'Pistacho',
+  'Pomelo', 'Praliné', 'Regaliz', 'Resinas', 'Romero', 'Ron', 'Rosa', 'Rosa de Damasco', 'Rosa de Mayo', 'Salvia',
+  'Salvia esclarea', 'Sal marina', 'Sándalo', 'Styrax', 'Tabaco', 'Té', 'Té negro', 'Té verde', 'Tomillo', 'Toronja',
+  'Tuberosa', 'Vainilla', 'Vainilla de Madagascar', 'Vetiver', 'Violeta', 'Whisky', 'Ylang-ylang', 'Yuzu', 'Zanahoria',
+  'Ámbar oscuro', 'Avellana', 'Bayas de enebro', 'Calone', 'Caramelo salado', 'Cedrat', 'Cuero de gamuza', 'Durazno',
+  'Flor de loto', 'Hierbas aromáticas', 'Hojas verdes', 'Humo', 'Lavanda francesa', 'Lirio', 'Magnolia', 'Maracuyá',
+  'Notas acuáticas', 'Notas amaderadas', 'Notas verdes', 'Peonía', 'Pimiento', 'Vetiver de Haití', 'Mate', 'Bourbon',
+];
