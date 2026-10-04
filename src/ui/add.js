@@ -44,7 +44,8 @@ export function openAddDialog(api) {
       const mode = route === 'coleccion' ? 'owned' : route === 'wishlist' ? 'wishlist' : null;
       const vs = mode && api.state.views[mode];
       const hidden = vs && mode === data.status && filterPerfumes([{ id: 'new', ...data }], vs.filters).length === 0;
-      toast(`${data.name} agregado${hidden ? ' (oculto por los filtros)' : ''}`, 'success');
+      const elsewhere = mode && data.status !== mode ? (data.status === 'wishlist' ? ' (en tu wishlist)' : ' (en tu colección)') : '';
+      toast(`${data.name} agregado${hidden ? ' (oculto por los filtros)' : ''}${elsewhere}`, 'success');
     } catch (x) {
       errorEl.textContent = errorMessage(x);
       errorEl.hidden = false;

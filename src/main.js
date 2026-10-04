@@ -1,4 +1,4 @@
-import { $, toast, errorMessage } from './ui/dom.js';
+import { $, toast, errorMessage, closeDialog } from './ui/dom.js';
 import { initTheme } from './ui/theme.js';
 import { renderLogin, renderNoAccess } from './ui/screens.js';
 import { renderShell, setActiveTab } from './ui/nav.js';
@@ -130,6 +130,7 @@ addEventListener('hashchange', () => {
     }
     return;
   }
+  closeDialog();
   currentHash = location.hash;
   window.scrollTo(0, 0);
   route();
