@@ -19,9 +19,7 @@ App web personal para administrar la colección de perfumes de Rodrigo y elegir 
 index.html (GitHub Pages, PWA)  ──login Google──►  Firebase Auth
         │
         ├── lee/escribe ──►  Firestore
-        │                     ├─ perfumes/{perfumeId}
-        │                     ├─ brands/{brandId}
-        │                     └─ notes/{noteId}
+        │                     └─ perfumes/{perfumeId}
         │
         └── clima ──►  Open-Meteo (sin API key)
 ```
@@ -71,16 +69,12 @@ El **mood** no se guarda: se deriva de `familyMain`.
 
 Cada familia tiene un color propio para su chip.
 
-### `brands/{brandId}`
+### Catálogos de marcas y notas
 
-- `name` (string, único por nombre normalizado), `custom` (bool: `true` si la agregó el usuario).
-- Precarga de ~800 marcas: diseñador, nicho y árabes/clones.
-- El selector de marca es un dropdown con buscador; si no existe, opción "Agregar «X»" que la crea con `custom: true`.
+Sin colecciones propias en Firestore: cada catálogo = semilla estática en el código ∪ valores ya usados en los perfumes.
 
-### `notes/{noteId}`
-
-- `name` (string, único normalizado). Se precarga con todas las notas usadas en la migración.
-- Selector de notas: buscador con chips; si no existe, "Agregar «X»".
+- **Marcas:** semilla de ≥600 (diseñador, nicho, árabes/clones, masivas) + marcas de `brand` y `dupeOf.brand` de los perfumes. Dropdown con buscador; si no existe, "Agregar «X»" y queda disponible en cuanto se guarda el perfume.
+- **Notas:** semilla de notas comunes en español + notas usadas en los perfumes. Buscador con chips; si no existe, "Agregar «X»".
 
 ### Normalización
 
@@ -106,7 +100,7 @@ Navegación: barra inferior en celular (Colección · Hoy · Wishlist · Dupes),
 ### 2. Ficha del perfume
 
 - Todos los campos, editables en la misma pantalla.
-- Botón **"Ver en Fragrantica"**: abre `https://www.fragrantica.com/search/?query=<marca> <nombre>` en pestaña nueva, para elegir familia/notas/temporada mirando la ficha.
+- Botón **"Ver en Fragrantica"**: abre en pestaña nueva `https://duckduckgo.com/?q=\site:fragrantica.com <marca> <nombre>` (el `\` de DuckDuckGo salta directo al primer resultado, la ficha de Fragrantica; Fragrantica no permite armar el link sin su id numérico), para elegir familia/notas/temporada mirando la ficha.
 - Si es dupe de un perfume que el usuario tiene: link al original. Si es un original: "Tus dupes de este: …".
 - Eliminar perfume (con confirmación).
 
@@ -144,7 +138,11 @@ Navegación: barra inferior en celular (Colección · Hoy · Wishlist · Dupes),
    - `Dupe Of`: separar en `{brand, name}`, expandir abreviaturas (PDM → Parfums de Marly, TF → Tom Ford, LV → Louis Vuitton, JPG → Jean Paul Gaultier, MFK → Maison Francis Kurkdjian, CH → Carolina Herrera, YSL → Yves Saint Laurent, etc.), corregir órdenes invertidos ("Tobacolor - Dior" → Dior - Tobacolor) y separar múltiples ("Creed - Aventus & Dior - Sauvage" → 2 originales).
 3. Investigar los 139 (iFragrance, Fragrantica y otras fuentes vía buscador): `familyMain`, `familySecondary`, `notes` (5–8), `seasons`, `occasions`, `timeOfDay`.
 4. Generar una **tabla de revisión** con todos los datos y las correcciones marcadas, para que el usuario la apruebe o corrija.
-5. Con el OK, importar a Firestore con un script. `status = owned`, `rating` vacío, `favorite = false`.
+5. Con el OK, importar desde la propia app en `#/importar` (ruta sin link en el menú): el usuario elige el JSON local y se escribe con su sesión, sin service account. El JSON vive en `migration/` (gitignored), no se publica. `status = owned`, `rating` vacío, `favorite = false`.
+
+## Modo demo
+
+En `localhost` con `?demo`, la app usa un backend en memoria con datos de ejemplo (misma interfaz que el de Firebase) para poder probarla sin login.
 
 ## Fuera de alcance
 
