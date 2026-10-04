@@ -30,12 +30,14 @@ export function filterPerfumes(perfumes, f) {
     && (!f.note || (p.notes ?? []).some((n) => normalize(n) === normalize(f.note))));
 }
 
+const orderOf = (p) => p.addedAt ?? (typeof p.createdAt?.toMillis === 'function' ? p.createdAt.toMillis() : null);
+
 const SORTS = {
   brand: byBrandName,
   name: (a, b) => compareText(a.name, b.name) || compareText(a.brand, b.brand),
-  // Orden de compra: addedAt (los importados usan su fila de la planilla, los nuevos Date.now()).
-  recent: (a, b) => (b.addedAt ?? -1) - (a.addedAt ?? -1) || byBrandName(a, b),
-  oldest: (a, b) => (a.addedAt ?? Infinity) - (b.addedAt ?? Infinity) || byBrandName(a, b),
+  // Orden de compra: addedAt (importados = fila de la planilla, nuevos = Date.now()); si falta, la fecha de carga.
+  recent: (a, b) => (orderOf(b) ?? -1) - (orderOf(a) ?? -1) || byBrandName(a, b),
+  oldest: (a, b) => (orderOf(a) ?? Infinity) - (orderOf(b) ?? Infinity) || byBrandName(a, b),
   rating: (a, b) => (b.rating ?? 0) - (a.rating ?? 0) || byBrandName(a, b),
 };
 

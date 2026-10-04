@@ -61,3 +61,8 @@ describe('purchase order', () => {
     expect(sortPerfumes(L, 'oldest').map((p) => p.id)).toEqual(['a', 'b', 'c']);
   });
 });
+
+it('recent falls back to createdAt when addedAt is missing', () => {
+  const L = [{ id: 'old', brand: 'A', name: 'x', addedAt: 3 }, { id: 'new', brand: 'B', name: 'y', createdAt: { toMillis: () => 1700000000000 } }];
+  expect(sortPerfumes(L, 'recent').map((p) => p.id)).toEqual(['new', 'old']);
+});

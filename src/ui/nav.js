@@ -6,6 +6,7 @@ const TABS = [
   { name: 'hoy', label: 'Hoy', icon: '✨' },
   { name: 'wishlist', label: 'Wishlist', icon: '💭' },
   { name: 'dupes', label: 'Dupes', icon: '🔁' },
+  { name: 'novedades', label: 'Novedades', icon: '📰' },
 ];
 
 const tabLinks = (cls) => TABS.map((t) =>

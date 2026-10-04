@@ -5,6 +5,7 @@ import { renderShell, setActiveTab } from './ui/nav.js';
 import { renderCollection } from './ui/collection.js';
 import { renderToday } from './ui/today.js';
 import { renderDupes } from './ui/dupes.js';
+import { renderNews } from './ui/news.js';
 import { renderDetail } from './ui/detail.js';
 import { openAddDialog } from './ui/add.js';
 import { renderImporter } from './ui/importer.js';
@@ -36,6 +37,7 @@ const state = {
   },
   today: { occasion: 'diario', weather: null, shown: [], rolledClimate: null },
   dupesQuery: '',
+  news: { lang: '', data: null },
   unsubscribe: null,
 };
 
@@ -110,6 +112,7 @@ function route({ fromData = false } = {}) {
     case 'hoy': return renderToday(view, api, opts);
     case 'wishlist': return renderCollection(view, api, 'wishlist', opts);
     case 'dupes': return renderDupes(view, api, opts);
+    case 'novedades': return renderNews(view, api);
     case 'p': return renderDetail(view, api, r.id, opts);
     case 'importar': return renderImporter(view, api, opts);
     default: return renderCollection(view, api, 'owned', opts);
