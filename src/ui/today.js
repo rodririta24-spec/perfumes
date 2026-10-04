@@ -15,7 +15,7 @@ function context(t) {
   return { climate, occasion: t.occasion, daytime: isDaytime(now.getHours()) };
 }
 
-export function renderToday(view, api, { fromData = false } = {}) {
+export function renderToday(view, api) {
   const t = api.state.today;
   if (view.dataset.screen !== 'hoy') {
     view.dataset.screen = 'hoy';
@@ -45,7 +45,7 @@ export function renderToday(view, api, { fromData = false } = {}) {
     };
     loadWeather(view, api);
   }
-  if (!t.shown.length || (fromData && staleShown(api, t))) reroll(view, api);
+  if (!t.shown.length || staleShown(api, t)) reroll(view, api);
   else renderCards(view, api);
 }
 

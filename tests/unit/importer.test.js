@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseImport, planImport } from '../../src/lib/importer.js';
+import { parseImport, planImport, existingImportIds } from '../../src/lib/importer.js';
 import { importId } from '../../src/lib/perfume.js';
 
 const ok = { brand: 'Lattafa', name: 'Asad', concentration: 'edp', _changes: ['x'] };
@@ -47,7 +47,7 @@ describe('planImport', () => {
   it('treats an item whose importId equals an existing doc id as existing, even if that doc changed', () => {
     const item = mk('Asad');
     const doc = { id: importId(item), brand: 'Lattafa', name: 'Asad Editado', concentration: 'EDP' };
-    const ids = new Set([doc].flatMap((p) => [importId(p), p.id]));
+    const ids = existingImportIds([doc]);
     const { toAdd, existing } = planImport([item], ids);
     expect(toAdd).toEqual([]);
     expect(existing).toEqual([item]);

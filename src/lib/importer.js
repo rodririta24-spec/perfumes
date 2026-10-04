@@ -1,5 +1,8 @@
 import { preparePerfume, importId } from './perfume.js';
 
+// Ids ya presentes: por contenido (importId) y por id de documento (los cargados a mano tienen ids aleatorios).
+export const existingImportIds = (perfumes) => new Set(perfumes.flatMap((p) => [importId(p), p.id]));
+
 export function parseImport(json) {
   const list = Array.isArray(json) ? json : json?.perfumes;
   if (!Array.isArray(list)) return { items: [], errors: [{ index: -1, label: 'archivo', errors: ['Se esperaba una lista de perfumes'] }] };
