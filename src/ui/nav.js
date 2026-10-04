@@ -19,7 +19,7 @@ export function renderShell(app, { email, demo, onAdd, onLogout }) {
       <div class="topbar-actions">
         <button class="btn btn-primary" id="btn-add" aria-label="Agregar perfume">+<span class="btn-add-label"> Agregar</span></button>
         <button class="icon-btn" id="btn-theme" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
-        <button class="btn btn-ghost" id="btn-logout" title="Salir (${esc(email)})" aria-label="Salir"><span class="logout-label">Salir</span><span class="logout-icon" aria-hidden="true">⎋</span></button>
+        <button class="btn btn-ghost" id="btn-logout" title="Salir (${esc(email)})" aria-label="Salir"><span class="logout-label">Salir</span><svg class="logout-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></button>
       </div>
     </header>
     <main id="view" class="main"></main>

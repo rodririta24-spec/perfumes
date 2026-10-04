@@ -20,7 +20,7 @@ let dialogReady = false;
 function initDialog(dlg) {
   if (dialogReady) return;
   dialogReady = true;
-  dlg.addEventListener('close', () => { dlg.innerHTML = ''; });
+  dlg.addEventListener('close', () => { if (!dlg.open) dlg.innerHTML = ''; });
   dlg.addEventListener('cancel', (e) => {
     if (dlg.querySelector('form[data-dirty="1"]') && !confirm('¿Descartar los cambios sin guardar?')) e.preventDefault();
   });

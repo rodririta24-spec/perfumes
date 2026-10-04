@@ -97,7 +97,11 @@ export function createPicker(root, { options, value, multiple = false, placehold
 
   input.addEventListener('focus', open);
   input.addEventListener('input', open);
-  input.addEventListener('blur', () => { close(); commitTyped(); });
+  input.addEventListener('blur', (e) => {
+    close();
+    if (e.relatedTarget && root.contains(e.relatedTarget)) return;
+    commitTyped();
+  });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();

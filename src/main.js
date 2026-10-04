@@ -124,8 +124,10 @@ addEventListener('hashchange', () => {
     return;
   }
   if (!confirmDiscard()) {
-    ignoreNextHash = true;
-    location.hash = currentHash;
+    if (location.hash !== currentHash) {
+      ignoreNextHash = true;
+      location.hash = currentHash;
+    }
     return;
   }
   currentHash = location.hash;
@@ -134,5 +136,8 @@ addEventListener('hashchange', () => {
 });
 
 addEventListener('beforeunload', (e) => {
-  if (hasDirtyForm()) e.preventDefault();
+  if (hasDirtyForm()) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
 });
