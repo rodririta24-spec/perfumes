@@ -1,5 +1,5 @@
 import { esc } from '../lib/html.js';
-import { CONCENTRATIONS, FAMILIES, SEASONS, OCCASIONS, TIMES, STATUSES } from '../lib/constants.js';
+import { CONCENTRATIONS, FAMILIES, SEASONS, OCCASIONS, TIMES, STATUSES, PRIORITIES } from '../lib/constants.js';
 import { createPicker } from './picker.js';
 
 const selectOptions = (list, sel, empty) =>
@@ -27,7 +27,8 @@ export function perfumeFieldsHTML(p = {}, { collapsed = false } = {}) {
         Array.from({ length: 10 }, (_, i) => i + 1).map((n) => `<option value="${n}"${p.rating === n ? ' selected' : ''}>${n}</option>`).join('')
       }</select></label>
       <label class="check"><input type="checkbox" name="favorite"${p.favorite ? ' checked' : ''}> ⭐ Favorito</label>
-    </div>`;
+    </div>
+    <label>Prioridad (wishlist)<select name="priority">${selectOptions(PRIORITIES, p.priority, 'Sin prioridad')}</select></label>`;
   return `
     <div class="field"><span class="field-label">Marca *</span><div class="brand-picker"></div></div>
     <label>Nombre *<input name="name" value="${esc(p.name)}" autocomplete="off"></label>
@@ -85,6 +86,7 @@ export function mountPerfumeFields(form, p = {}, { brands, notes, onDirty: userD
         occasions: checked('occasions'),
         timeOfDay: checked('timeOfDay')[0] || null,
         rating: f.namedItem('rating').value,
+        priority: f.namedItem('priority').value || null,
         favorite: f.namedItem('favorite').checked,
       };
     },

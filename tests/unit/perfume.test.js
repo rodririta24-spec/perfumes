@@ -13,7 +13,7 @@ describe('preparePerfume', () => {
     expect(data).toEqual({
       brand: 'Lattafa', name: 'Khamrah Qahwa', concentration: 'edp', status: 'owned', dupeOf: [],
       familyMain: null, familySecondary: null, notes: [], seasons: [], occasions: [],
-      timeOfDay: null, rating: null, favorite: false,
+      timeOfDay: null, rating: null, favorite: false, priority: null,
     });
   });
   it('keeps valid enums, drops invalid ones, dedupes', () => {
@@ -131,5 +131,20 @@ describe('addedAt', () => {
   it('can be patched', () => {
     expect(validPatch({ addedAt: 3 })).toEqual([]);
     expect(validPatch({ addedAt: 'x' })).not.toEqual([]);
+  });
+});
+
+describe('priority and quick patches', () => {
+  const b = { brand: 'Gucci', name: 'Guilty', concentration: 'parfum' };
+  it('keeps a valid priority', () => {
+    expect(preparePerfume({ ...b, priority: 'alta' }).data.priority).toBe('alta');
+    expect(preparePerfume({ ...b, priority: 'urgente' }).data.priority).toBeNull();
+  });
+  it('allows patching rating and priority (or clearing them)', () => {
+    expect(validPatch({ rating: 8 })).toEqual([]);
+    expect(validPatch({ rating: null })).toEqual([]);
+    expect(validPatch({ rating: 11 })).not.toEqual([]);
+    expect(validPatch({ priority: 'baja' })).toEqual([]);
+    expect(validPatch({ priority: 'x' })).not.toEqual([]);
   });
 });

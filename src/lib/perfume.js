@@ -1,4 +1,4 @@
-import { CONCENTRATIONS, FAMILIES, SEASONS, OCCASIONS, TIMES } from './constants.js';
+import { CONCENTRATIONS, FAMILIES, SEASONS, OCCASIONS, TIMES, PRIORITIES } from './constants.js';
 import { cleanText, normalize } from './normalize.js';
 
 const arr = (v) => (Array.isArray(v) ? v : []);
@@ -52,6 +52,7 @@ export function preparePerfume(input) {
     timeOfDay: has(TIMES, input.timeOfDay) ? input.timeOfDay : null,
     rating: parseRating(input.rating),
     favorite: input.favorite === true,
+    priority: has(PRIORITIES, input.priority) ? input.priority : null,
   };
   // Orden de compra: solo se incluye si viene (así una edición no lo pisa con null).
   if (isOrder(input.addedAt)) data.addedAt = input.addedAt;
@@ -74,6 +75,8 @@ export function validPatch(patch) {
     if (k === 'favorite') { if (typeof patch.favorite !== 'boolean') errors.push('favorite debe ser booleano'); }
     else if (k === 'status') { if (patch.status !== 'owned' && patch.status !== 'wishlist') errors.push('status inválido'); }
     else if (k === 'addedAt') { if (!isOrder(patch.addedAt)) errors.push('addedAt inválido'); }
+    else if (k === 'rating') { if (patch.rating !== null && parseRating(patch.rating) === null) errors.push('Puntuación inválida'); }
+    else if (k === 'priority') { if (patch.priority !== null && !has(PRIORITIES, patch.priority)) errors.push('Prioridad inválida'); }
     else errors.push(`Cambio no permitido: ${k}`);
   }
   return errors;

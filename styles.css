@@ -132,6 +132,29 @@ fieldset.field > legend { padding: 0; margin-bottom: 6px; }
 .news-item a:hover { color: var(--primary); text-decoration: underline; }
 .news-src { font-size: 12px; color: var(--muted); }
 
+.quick-fav { font-size: 16px; padding: 2px 6px; line-height: 1; }
+.quick-rate { width: auto; padding: 3px 6px; font-size: 14px; }
+.ptable .col-fav { width: 1%; padding-right: 0; }
+.prio { font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--border); }
+.prio-alta { color: var(--danger); border-color: var(--danger); }
+.prio-media { color: var(--primary); border-color: var(--primary); }
+.prio-baja { color: var(--muted); }
+
+.stats { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; display: flex; flex-direction: column; }
+.kpi-n { font-size: 26px; font-weight: 700; }
+.kpi-l { font-size: 13px; color: var(--muted); }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.bars li { display: grid; grid-template-columns: 130px 1fr 32px; align-items: center; gap: 8px; font-size: 13px; }
+.bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { background: var(--surface-2); border-radius: 99px; height: 10px; overflow: hidden; }
+.bar { display: block; height: 100%; border-radius: 99px; }
+.bar-n { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) { .kpis { grid-template-columns: 1fr 1fr 1fr; } .kpi-n { font-size: 20px; } .bars li { grid-template-columns: 100px 1fr 28px; } }
+
 .summary-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .view-toggle { display: flex; gap: 2px; flex: none; }
 .view-toggle .icon-btn { color: var(--muted); }

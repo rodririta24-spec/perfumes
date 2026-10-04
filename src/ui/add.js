@@ -2,6 +2,7 @@ import { openDialog, closeDialog, toast, errorMessage } from './dom.js';
 import { perfumeFieldsHTML, mountPerfumeFields } from './form.js';
 import { preparePerfume, findDuplicate, fragranticaUrl } from '../lib/perfume.js';
 import { filterPerfumes } from '../lib/filters.js';
+import { wishlistWarnings } from '../lib/similar.js';
 import { labelOf, CONCENTRATIONS } from '../lib/constants.js';
 
 export function openAddDialog(api) {
@@ -54,6 +55,10 @@ export function openAddDialog(api) {
       const what = `${dup.brand} ${dup.name} (${labelOf(CONCENTRATIONS, dup.concentration)})`;
       const msg = dup.status === 'wishlist' ? `Ya está en tu wishlist: ${what}. ¿Agregarlo igual?` : `Ya tenés ${what}. ¿Agregarlo igual?`;
       if (!confirm(msg)) return;
+    }
+    if (data.status === 'wishlist') {
+      const warnings = wishlistWarnings(api.perfumes, data);
+      if (warnings.length && !confirm(`${warnings.join('\n')}\n\n¿Agregarlo igual a la wishlist?`)) return;
     }
     try {
       const { done } = api.backend.createPerfume(data);

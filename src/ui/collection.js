@@ -11,6 +11,7 @@ const SORTS = [
   { value: 'rating', label: 'Puntuación' },
   { value: 'recent', label: 'Más recientes primero' },
   { value: 'oldest', label: 'Más antiguos primero' },
+  { value: 'priority', label: 'Prioridad (wishlist)' },
 ];
 const options = (list, sel, empty) =>
   `<option value="">${esc(empty)}</option>` + list.map((o) => `<option value="${esc(o.value)}"${o.value === sel ? ' selected' : ''}>${esc(o.label)}</option>`).join('');
@@ -55,6 +56,7 @@ function toolbarHTML(mode, vs, perfumes) {
     <div class="summary-row">
       <p class="summary-line" id="summary" aria-live="polite"></p>
       <div class="view-toggle" role="group" aria-label="Vista">
+        ${mode === 'owned' ? '<a href="#/stats" class="btn btn-small btn-ghost">📊 Estadísticas</a>' : ''}
         <button type="button" class="icon-btn" data-layout="grid" aria-label="Ver como tarjetas" title="Tarjetas">▦</button>
         <button type="button" class="icon-btn" data-layout="list" aria-label="Ver como lista" title="Lista">☰</button>
       </div>
@@ -130,6 +132,15 @@ function bind(view, api, mode) {
 
   const results = view.querySelector('#results');
   const openCard = (card) => api.go(`#/p/${encodeURIComponent(card.dataset.id)}`);
+  results.addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-quick-rate]');
+    const row = sel?.closest('.pcard, .prow');
+    if (!row) return;
+    const rating = sel.value ? Number(sel.value) : null;
+    api.backend.patchPerfume(row.dataset.id, { rating })
+      .then(() => toast(rating ? `Puntuación: ${rating}/10` : 'Puntuación borrada', 'success'))
+      .catch((x) => toast(errorMessage(x), 'error'));
+  });
   results.addEventListener('click', (e) => {
     const card = e.target.closest('.pcard, .prow');
     if (!card) return;
@@ -141,7 +152,15 @@ function bind(view, api, mode) {
         .catch((x) => { bought.disabled = false; toast(errorMessage(x), 'error'); });
       return;
     }
-    if (e.target.closest('a')) return;
+    const fav = e.target.closest('[data-quick-fav]');
+    if (fav) {
+      const next = fav.getAttribute('aria-pressed') !== 'true';
+      fav.textContent = next ? '⭐' : '☆';
+      fav.setAttribute('aria-pressed', String(next));
+      api.backend.patchPerfume(card.dataset.id, { favorite: next }).catch((x) => toast(errorMessage(x), 'error'));
+      return;
+    }
+    if (e.target.closest('a, select')) return;
     openCard(card);
   });
 }
@@ -178,5 +197,5 @@ function renderResults(view, api, mode) {
   const actions = mode === 'wishlist' ? '<button type="button" class="btn btn-small btn-primary" data-bought>¡Lo compré!</button>' : '';
   const list = getLayout() === 'list';
   res.className = list ? 'table-wrap' : 'grid';
-  res.innerHTML = list ? perfumeTableHTML(rows, { actions }) : rows.map((p) => perfumeCardHTML(p, { actions })).join('');
+  res.innerHTML = list ? perfumeTableHTML(rows, { actions, wishlist: mode === 'wishlist' }) : rows.map((p) => perfumeCardHTML(p, { actions })).join('');
 }

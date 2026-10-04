@@ -54,6 +54,12 @@ export const TIMES = [
   { value: 'ambos', label: 'Ambos' },
 ];
 
+export const PRIORITIES = [
+  { value: 'alta', label: 'Alta', rank: 3 },
+  { value: 'media', label: 'Media', rank: 2 },
+  { value: 'baja', label: 'Baja', rank: 1 },
+];
+
 export const labelOf = (list, value) => list.find((o) => o.value === value)?.label ?? '';
 export const familyOf = (value) => FAMILIES.find((f) => f.value === value) ?? null;
 export const moodOf = (perfume) => familyOf(perfume?.familyMain)?.mood ?? null;
