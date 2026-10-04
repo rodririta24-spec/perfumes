@@ -6,7 +6,7 @@ let pickerCount = 0;
 
 // Combobox con buscador. single: un valor (marca). multiple: chips (notas).
 // `options` es una función para leer siempre el catálogo actualizado.
-export function createPicker(root, { options, value, multiple = false, placeholder = '', ariaLabel = '', onChange = () => {} }) {
+export function createPicker(root, { options, value, multiple = false, placeholder = '', ariaLabel = '', focusKey = '', onChange = () => {} }) {
   let selected = multiple ? [...(value ?? [])] : cleanText(value);
   let items = [];
   let active = -1;
@@ -16,6 +16,7 @@ export function createPicker(root, { options, value, multiple = false, placehold
     <input type="text" class="picker-input" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${uid}-list" autocomplete="off" placeholder="${esc(placeholder)}"${ariaLabel ? ` aria-label="${esc(ariaLabel)}"` : ''}>
     <ul class="picker-list" id="${uid}-list" role="listbox" hidden></ul>`;
   const input = root.querySelector('.picker-input');
+  if (focusKey) input.dataset.focusKey = focusKey;
   const list = root.querySelector('.picker-list');
   const chips = root.querySelector('.picker-chips');
 

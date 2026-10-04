@@ -40,18 +40,18 @@ export function perfumeFieldsHTML(p = {}, { collapsed = false } = {}) {
 
 export function mountPerfumeFields(form, p = {}, { brands, notes, onDirty: userDirty = () => {} }) {
   const onDirty = () => { form.dataset.dirty = '1'; userDirty(); };
-  const brand = createPicker(form.querySelector('.brand-picker'), { options: brands, value: p.brand ?? '', placeholder: 'Buscar marca…', ariaLabel: 'Marca', onChange: onDirty });
+  const brand = createPicker(form.querySelector('.brand-picker'), { options: brands, value: p.brand ?? '', placeholder: 'Buscar marca…', ariaLabel: 'Marca', focusKey: 'brand', onChange: onDirty });
   const notePicker = createPicker(form.querySelector('.notes-picker'), {
-    options: notes, value: p.notes ?? [], multiple: true, placeholder: 'Buscar nota… (ej: vainilla)', ariaLabel: 'Notas', onChange: onDirty,
+    options: notes, value: p.notes ?? [], multiple: true, placeholder: 'Buscar nota… (ej: vainilla)', ariaLabel: 'Notas', focusKey: 'notes', onChange: onDirty,
   });
   const dupeBox = form.querySelector('.dupes-edit');
   const dupeRows = [];
   const addDupeRow = (d = { brand: '', name: '' }) => {
     const row = document.createElement('div');
     row.className = 'dupe-row';
-    row.innerHTML = `<div class="dupe-brand"></div><input class="dupe-name" aria-label="Perfume original" placeholder="Perfume original" value="${esc(d.name)}" autocomplete="off"><button type="button" class="icon-btn" aria-label="Quitar original">✕</button>`;
+    row.innerHTML = `<div class="dupe-brand"></div><input class="dupe-name" data-focus-key="dupe-name-${dupeRows.length}" aria-label="Perfume original" placeholder="Perfume original" value="${esc(d.name)}" autocomplete="off"><button type="button" class="icon-btn" aria-label="Quitar original">✕</button>`;
     dupeBox.append(row);
-    const entry = { row, brand: createPicker(row.querySelector('.dupe-brand'), { options: brands, value: d.brand, placeholder: 'Marca original', ariaLabel: 'Marca original', onChange: onDirty }) };
+    const entry = { row, brand: createPicker(row.querySelector('.dupe-brand'), { options: brands, value: d.brand, placeholder: 'Marca original', ariaLabel: 'Marca original', focusKey: `dupe-brand-${dupeRows.length}`, onChange: onDirty }) };
     dupeRows.push(entry);
     row.querySelector('.icon-btn').onclick = () => {
       row.remove();

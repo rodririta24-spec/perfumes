@@ -188,3 +188,5 @@ dialog h2 { margin-bottom: 14px; }
 .toast-success { background: var(--toast-ok-bg); color: #fff; }
 .toast-error { background: var(--toast-err-bg); color: #fff; }
 @media (min-width: 769px) { .toasts { bottom: 24px; } }
+
+[hidden] { display: none !important; }

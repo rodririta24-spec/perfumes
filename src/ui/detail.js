@@ -8,11 +8,28 @@ import { toast, errorMessage } from './dom.js';
 
 const link = (p, text) => `<a href="#/p/${encodeURIComponent(p.id)}">${esc(text)}</a>`;
 
-const signature = (p) => JSON.stringify(Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'createdAt' && k !== 'updatedAt')));
+// Firma de lo que se ve en la ficha: datos del perfume (sin fechas) más ids de originales y dupes enlazados.
+const signature = (p, originals, myDupes) => JSON.stringify([
+  Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'createdAt' && k !== 'updatedAt')),
+  originals.map(({ owned }) => owned?.id ?? null),
+  myDupes.map((x) => x.id),
+]);
+
+const focusKeyOf = (el) => {
+  if (el.dataset.focusKey) return el.dataset.focusKey;
+  for (const a of ['fav', 'bought', 'delete']) if (el.hasAttribute(`data-${a}`)) return `btn-${a}`;
+  if (el.name) return ['checkbox', 'radio'].includes(el.type) ? `${el.name}=${el.value}` : el.name;
+  return '';
+};
+const FOCUSABLE = 'input, select, textarea, button, a[href]';
 
 // draft: datos preparados de un guardado que falló; se vuelven a mostrar como edición pendiente.
 export function renderDetail(view, api, id, { fromData = false, draft = null } = {}) {
   const p = api.byId(id);
+  const index = p ? ownedIndex(api.perfumes) : null;
+  const originals = p ? (p.dupeOf ?? []).map((d) => ({ d, owned: findOriginal(index, d) })) : [];
+  const myDupes = p ? dupesOf(api.perfumes, p) : [];
+  const sig = p ? signature(p, originals, myDupes) : '';
   const same = view.dataset.screen === `p:${id}`;
   let focusKey = null;
   if (fromData && same) {
@@ -20,8 +37,8 @@ export function renderDetail(view, api, id, { fromData = false, draft = null } =
     if (view.querySelector('form')?.dataset.dirty === '1') return;
     const active = document.activeElement;
     if (p && active && view.querySelector('.detail')?.contains(active)) {
-      if (view.dataset.sig === signature(p)) return;
-      focusKey = ['id', 'name', 'data-fav', 'data-bought', 'data-delete'].filter((a) => active.hasAttribute(a)).map((a) => [a, active.getAttribute(a)])[0] ?? null;
+      if (view.dataset.sig === sig) return;
+      focusKey = focusKeyOf(active) || 'btn-fav';
     }
   }
   view.dataset.screen = `p:${id}`;
@@ -30,10 +47,7 @@ export function renderDetail(view, api, id, { fromData = false, draft = null } =
     view.innerHTML = '<div class="empty"><p>No se encontró este perfume.</p><a class="btn" href="#/coleccion">Volver a la colección</a></div>';
     return;
   }
-  const index = ownedIndex(api.perfumes);
-  const originals = (p.dupeOf ?? []).map((d) => ({ d, owned: findOriginal(index, d) }));
-  const myDupes = dupesOf(api.perfumes, p);
-  view.dataset.sig = signature(p);
+  view.dataset.sig = sig;
   const shown = draft ? { ...p, ...draft } : p;
   let listHash = p.status === 'wishlist' ? '#/wishlist' : '#/coleccion';
 
@@ -104,7 +118,8 @@ export function renderDetail(view, api, id, { fromData = false, draft = null } =
     api.backend.updatePerfume(p.id, input)
       .catch((x) => {
         toast(errorMessage(x), 'error');
-        if (view.dataset.screen === `p:${id}`) renderDetail(view, api, id, { draft: data });
+        // Con ediciones más nuevas en pantalla no se pisa nada: solo el aviso.
+        if (view.dataset.screen === `p:${id}` && view.querySelector('form')?.dataset.dirty !== '1') renderDetail(view, api, id, { draft: data });
       });
     toast('Cambios guardados', 'success');
   };
@@ -114,26 +129,32 @@ export function renderDetail(view, api, id, { fromData = false, draft = null } =
     favBox.checked = on;
     showFav(on);
     api.backend.patchPerfume(p.id, { favorite: on }).catch((x) => {
-      favBox.checked = !on;
-      showFav(!on);
+      if (form.isConnected) {
+        favBox.checked = !on;
+        showFav(!on);
+      }
       toast(errorMessage(x), 'error');
     });
   };
 
   const bought = view.querySelector('[data-bought]');
   if (bought) {
+    const setOwned = (owned) => {
+      const radio = form.querySelector(`input[name="status"][value="${owned ? 'owned' : 'wishlist'}"]`);
+      if (radio) radio.checked = true;
+      bought.hidden = owned;
+      bought.disabled = false;
+      listHash = owned ? '#/coleccion' : '#/wishlist';
+      view.querySelector('.back').setAttribute('href', listHash);
+    };
     bought.onclick = () => {
-      bought.disabled = true;
+      setOwned(true);
+      toast('¡Pasó a tu colección!', 'success');
       api.backend.patchPerfume(p.id, { status: 'owned' })
-        .then(() => {
-          const radio = form.querySelector('input[name="status"][value="owned"]');
-          if (radio) radio.checked = true;
-          bought.hidden = true;
-          listHash = '#/coleccion';
-          view.querySelector('.back').setAttribute('href', listHash);
-          toast('¡Pasó a tu colección!', 'success');
-        })
-        .catch((x) => { bought.disabled = false; toast(errorMessage(x), 'error'); });
+        .catch((x) => {
+          if (form.isConnected) setOwned(false);
+          toast(errorMessage(x), 'error');
+        });
     };
   }
 
@@ -154,8 +175,7 @@ export function renderDetail(view, api, id, { fromData = false, draft = null } =
   };
 
   if (focusKey) {
-    const [a, v] = focusKey;
-    const el = [...view.querySelectorAll(`[${a}]`)].find((n) => n.getAttribute(a) === v);
-    el?.focus();
+    const target = [...view.querySelectorAll(FOCUSABLE)].find((n) => focusKeyOf(n) === focusKey) ?? favBtn;
+    target.focus();
   }
 }
