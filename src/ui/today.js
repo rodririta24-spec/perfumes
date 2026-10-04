@@ -1,12 +1,13 @@
 import { esc } from '../lib/html.js';
 import { OCCASIONS, SEASONS, labelOf } from '../lib/constants.js';
-import { suggest, climateFromTemp, climateFromSeason, seasonFromDate, isDaytime } from '../lib/suggest.js';
+import { suggest, scorePerfume, climateFromTemp, climateFromSeason, seasonFromDate, isDaytime } from '../lib/suggest.js';
 import { weatherLabel } from '../lib/weather.js';
 import { getPosition, fetchWeather } from '../data/weather.js';
 import { perfumeCardHTML } from './card.js';
 
 const CLIMATE_TEXT = { hot: 'hace calor: priorizo frescos', cold: 'hace frío: priorizo cálidos', mild: 'clima templado: mezclo' };
 const WEATHER_TTL = 30 * 60 * 1000;
+let pendingWeather = null;
 
 function context(t) {
   const now = new Date();
@@ -14,23 +15,26 @@ function context(t) {
   return { climate, occasion: t.occasion, daytime: isDaytime(now.getHours()) };
 }
 
-export function renderToday(view, api) {
+export function renderToday(view, api, { fromData = false } = {}) {
   const t = api.state.today;
   if (view.dataset.screen !== 'hoy') {
     view.dataset.screen = 'hoy';
     view.innerHTML = `
       <section class="today">
-        <div class="weather" id="weather"></div>
+        <div class="weather" id="weather" aria-live="polite"></div>
         <div class="chips-row" id="occasions">${OCCASIONS.map((o) =>
-          `<button type="button" class="fchip${o.value === t.occasion ? ' active' : ''}" data-occ="${o.value}">${esc(o.label)}</button>`).join('')}</div>
-        <div class="grid" id="suggestions"></div>
+          `<button type="button" class="fchip${o.value === t.occasion ? ' active' : ''}" aria-pressed="${o.value === t.occasion}" data-occ="${o.value}">${esc(o.label)}</button>`).join('')}</div>
+        <div class="grid" id="suggestions" aria-live="polite"></div>
         <button type="button" class="btn btn-primary btn-big" id="reroll">🔄 Otra vez</button>
       </section>`;
     view.querySelector('#occasions').onclick = (e) => {
       const b = e.target.closest('[data-occ]');
       if (!b) return;
       t.occasion = b.dataset.occ;
-      view.querySelectorAll('[data-occ]').forEach((x) => x.classList.toggle('active', x === b));
+      view.querySelectorAll('[data-occ]').forEach((x) => {
+        x.classList.toggle('active', x === b);
+        x.setAttribute('aria-pressed', String(x === b));
+      });
       reroll(view, api);
     };
     view.querySelector('#reroll').onclick = () => reroll(view, api);
@@ -41,8 +45,17 @@ export function renderToday(view, api) {
     };
     loadWeather(view, api);
   }
-  if (!t.shown.length) reroll(view, api);
+  if (!t.shown.length || (fromData && staleShown(api, t))) reroll(view, api);
   else renderCards(view, api);
+}
+
+// Con datos nuevos, las sugerencias en pantalla pueden haber dejado de valer (borrado, pasó a wishlist, cambió la ocasión).
+function staleShown(api, t) {
+  const ctx = context(t);
+  return t.shown.some((id) => {
+    const p = api.byId(id);
+    return !p || p.status !== 'owned' || scorePerfume(p, ctx) <= 0;
+  });
 }
 
 function reroll(view, api) {
@@ -85,12 +98,16 @@ function renderWeather(view, t) {
 async function loadWeather(view, api) {
   const t = api.state.today;
   if (t.weather?.status === 'ok' && Date.now() - t.weather.at < WEATHER_TTL) return;
-  t.weather = { status: 'loading' };
+  // Al refrescar se conserva la lectura anterior hasta que llegue la nueva.
+  const prev = t.weather?.status === 'ok' ? t.weather : null;
+  if (!prev) t.weather = { status: 'loading' };
+  if (!pendingWeather) {
+    pendingWeather = (async () => fetchWeather(await getPosition()))().finally(() => { pendingWeather = null; });
+  }
   try {
-    const w = await fetchWeather(await getPosition());
-    t.weather = { status: 'ok', ...w, at: Date.now() };
+    t.weather = { status: 'ok', ...(await pendingWeather), at: Date.now() };
   } catch {
-    t.weather = { status: 'fallback' };
+    t.weather = prev ?? { status: 'fallback' };
   }
   if (view.dataset.screen !== 'hoy') return;
   if (context(t).climate !== t.rolledClimate) reroll(view, api);

@@ -1,6 +1,7 @@
-export function getPosition(timeout = 8000) {
-  const timer = new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera de ubicación agotado')), 10000));
-  return Promise.race([locate(timeout), timer]);
+export function getPosition(timeout = 6500) {
+  let id;
+  const timer = new Promise((_, reject) => { id = setTimeout(() => reject(new Error('Tiempo de espera de ubicación agotado')), 7000); });
+  return Promise.race([locate(timeout), timer]).finally(() => clearTimeout(id));
 }
 
 function locate(timeout) {

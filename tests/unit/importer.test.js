@@ -44,6 +44,14 @@ describe('planImport', () => {
     expect(existing).toEqual([items[0]]);
     expect(duplicates).toEqual([items[2]]);
   });
+  it('treats an item whose importId equals an existing doc id as existing, even if that doc changed', () => {
+    const item = mk('Asad');
+    const doc = { id: importId(item), brand: 'Lattafa', name: 'Asad Editado', concentration: 'EDP' };
+    const ids = new Set([doc].flatMap((p) => [importId(p), p.id]));
+    const { toAdd, existing } = planImport([item], ids);
+    expect(toAdd).toEqual([]);
+    expect(existing).toEqual([item]);
+  });
   it('different concentration is not a duplicate', () => {
     const { toAdd, duplicates } = planImport([mk('A', 'EDP'), mk('A', 'EDT')], new Set());
     expect(toAdd).toHaveLength(2);
