@@ -4,7 +4,7 @@ import { createPicker } from './picker.js';
 
 const selectOptions = (list, sel, empty) =>
   (empty !== undefined ? `<option value="">${esc(empty)}</option>` : '')
-  + list.map((o) => `<option value="${esc(o.value)}"${o.value === sel ? ' selected' : ''}>${esc(o.label)}</option>`).join('');
+  + list.map((o) => `<option value="${esc(o.value)}"${o.value === sel ? ' selected' : ''}>${esc(o.hint ? `${o.label} — ${o.hint}` : o.label)}</option>`).join('');
 const toggles = (type, name, list, isOn) =>
   `<div class="check-chips">${list.map((o) => `<label class="cchip"><input type="${type}" name="${name}" value="${esc(o.value)}"${isOn(o.value) ? ' checked' : ''}><span>${esc(o.label)}</span></label>`).join('')}</div>`;
 

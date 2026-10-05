@@ -20,17 +20,18 @@ export const MOODS = [
 ];
 
 export const FAMILIES = [
-  { value: 'citrico', label: 'Cítrico', mood: 'fresco', color: '#a67f00' },
-  { value: 'acuatico', label: 'Acuático', mood: 'fresco', color: '#1e88c8' },
-  { value: 'aromatico', label: 'Aromático', mood: 'fresco', color: '#4f9a6a' },
-  { value: 'verde', label: 'Verde', mood: 'fresco', color: '#3a8f35' },
-  { value: 'floral', label: 'Floral', mood: 'floral', color: '#d1528f' },
-  { value: 'frutal', label: 'Frutal', mood: 'floral', color: '#e0612e' },
-  { value: 'amaderado', label: 'Amaderado', mood: 'amaderado', color: '#8a6a45' },
-  { value: 'cuero_tabaco', label: 'Cuero/Tabaco', mood: 'calido', color: '#7a4e36' },
-  { value: 'oriental_ambar', label: 'Oriental/Ámbar', mood: 'calido', color: '#c07a1e' },
-  { value: 'especiado', label: 'Especiado', mood: 'calido', color: '#b8432f' },
-  { value: 'gourmand', label: 'Gourmand', mood: 'calido', color: '#9a5b8c' },
+  { value: 'citrico', label: 'Cítrico', mood: 'fresco', color: '#a67f00', hint: 'citrus, lemon, bergamot' },
+  { value: 'acuatico', label: 'Acuático', mood: 'fresco', color: '#1e88c8', hint: 'aquatic, marine, ozonic, salty' },
+  { value: 'aromatico', label: 'Aromático', mood: 'fresco', color: '#4f9a6a', hint: 'aromatic, lavender, fresh spicy, herbal' },
+  { value: 'verde', label: 'Verde', mood: 'fresco', color: '#3a8f35', hint: 'green, mossy, earthy, tea' },
+  { value: 'floral', label: 'Floral', mood: 'floral', color: '#d1528f', hint: 'floral, white floral, rose, iris' },
+  { value: 'frutal', label: 'Frutal', mood: 'floral', color: '#e0612e', hint: 'fruity, tropical, cherry' },
+  { value: 'amaderado', label: 'Amaderado', mood: 'amaderado', color: '#8a6a45', hint: 'woody, patchouli, cedar, sandalwood' },
+  { value: 'cuero_tabaco', label: 'Cuero/Tabaco', mood: 'calido', color: '#7a4e36', hint: 'leather, tobacco, smoky, oud' },
+  { value: 'oriental_ambar', label: 'Oriental/Ámbar', mood: 'calido', color: '#c07a1e', hint: 'amber, balsamic, resinous, incense' },
+  { value: 'especiado', label: 'Especiado', mood: 'calido', color: '#b8432f', hint: 'warm spicy, soft spicy, cinnamon' },
+  { value: 'atalcado', label: 'Atalcado/Almizclado', mood: 'floral', color: '#9c8fb8', hint: 'powdery, musky, iris, soapy' },
+  { value: 'gourmand', label: 'Gourmand', mood: 'calido', color: '#9a5b8c', hint: 'sweet, vanilla, coffee, nutty, caramel, cacao' },
 ];
 
 export const SEASONS = [

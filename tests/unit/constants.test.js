@@ -16,9 +16,9 @@ describe('moodOf', () => {
 });
 
 describe('catalog integrity', () => {
-  it('has 11 families, each with a known mood and a color', () => {
+  it('has 12 families, each with a known mood and a color', () => {
     const moods = new Set(MOODS.map((m) => m.value));
-    expect(FAMILIES).toHaveLength(11);
+    expect(FAMILIES).toHaveLength(12);
     for (const f of FAMILIES) {
       expect(moods.has(f.mood)).toBe(true);
       expect(f.color).toMatch(/^#[0-9a-f]{6}$/i);
